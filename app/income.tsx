@@ -43,30 +43,42 @@ const styles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 8,
-    marginBottom: 4,
+    alignItems: "center",
+    backgroundColor: "#f3e5f5",
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    paddingVertical: 6,
   },
   headerCell: {
     flex: 1,
+    minWidth: 70,
     fontWeight: "bold",
     fontSize: 16,
     textAlign: "center",
   },
   tableRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    alignItems: "center",
     backgroundColor: "#fff",
     paddingVertical: 8,
-    paddingHorizontal: 8,
     borderBottomWidth: 1,
     borderColor: "#eee",
+    minHeight: 36,
   },
   cell: {
     flex: 1,
+    minWidth: 70,
     fontSize: 16,
     textAlign: "center",
     color: "#333",
+  },
+  cellincome: {
+    flex: 1,
+    minWidth: 70,
+    fontSize: 16,
+    textAlign: "center",
+    color: "#8ec322",
+    fontWeight: "bold",
   },
 });
 
@@ -188,7 +200,7 @@ export default function Income() {
           <View style={styles.tableRow}>
             <Text style={styles.cell}>{item.year}</Text>
             <Text style={styles.cell}>{item.month}</Text>
-            <Text style={styles.cell}>{item.income}</Text>
+            <Text style={styles.cellincome}>{item.income}</Text>
           </View>
         )}
         contentContainerStyle={{ paddingBottom: 16 }}
