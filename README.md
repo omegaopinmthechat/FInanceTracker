@@ -1,50 +1,33 @@
-# Welcome to your Expo app 👋
+# 💸 FinanceTracker
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A simple personal finance tracker built with **React Native** and **Supabase** that helps users log and view their monthly income. The app is designed with mobile-first UI and integrates a cloud backend to store data securely and fetch it in real-time.
 
-## Get started
+---
 
-1. Install dependencies
+## 📱 Features
+
+- 📥 **Add Income**: Users can input their income for a specific month and year.
+- 📄 **View Income History**: Displays a list of all recorded incomes.
+- 🔄 **Live Updates**: Automatically fetches the latest data after each entry.
+- 🧾 **Structured UI**: Clean, responsive design using React Native components.
+
+---
+
+## 🛠️ Built With
+
+- **React Native** (via Expo)
+- **Supabase** – for database and backend API
+- **TypeScript** (optional, depending on your setup)
+- **React Native Paper** – for UI components (e.g. loader)
+- **Safe Area Context** – for padding on iOS/Android
+- **FlatList** – for rendering the income list
+
+---
+
+## ⚙️ Setup & Installation
+
+1. **Clone the repository**
 
    ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+   git clone https://github.com/yourusername/FinanceTracker.git
+   cd FinanceTracker
