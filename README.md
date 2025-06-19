@@ -30,4 +30,4 @@ A simple personal finance tracker built with **React Native** and **Supabase** t
 
    ```bash
    git clone https://github.com/yourusername/FinanceTracker.git
-   cd FinanceTracker
+   cd FInanceTracker
