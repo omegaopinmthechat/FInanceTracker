@@ -1,9 +1,150 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text, StyleSheet, TextInput, View, TouchableOpacity, FlatList } from "react-native";
+import {
+  Text,
+  StyleSheet,
+  TextInput,
+  View,
+  TouchableOpacity,
+  FlatList,
+} from "react-native";
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/utils/supabase";
 import { ActivityIndicator } from "react-native-paper";
 
+export default function Income() {
+  const [year, setYear] = useState("");
+  const [month, setMonth] = useState("");
+  const [income, setIncome] = useState("");
+  const [incomeData, setIncomeData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const handleSubmit = async () => {
+    if (!year || !month || !income) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.from("Income").insert([
+        {
+          year: parseInt(year),
+          month: month.trim().toLowerCase(),
+          income: parseInt(income),
+        },
+      ]);
+      fetchIncome();
+
+      if (error) throw error;
+
+      console.log("Success");
+      setYear("");
+      setMonth("");
+      setIncome("");
+    } catch (err) {
+      alert("Failed to add income.");
+      console.log("Supabase insert error", err);
+    }
+  };
+
+  const fetchIncome = async () => {
+    const { data, error } = await supabase.from("Income").select("*");
+
+    if (error) {
+      console.error("Error fetching income:", error);
+    } else {
+      setIncomeData(data || []);
+    }
+
+    setLoading(false);
+  };
+
+  //Loading
+  useEffect(() => {
+    fetchIncome();
+  }, []);
+  if (loading) {
+    return (
+      <SafeAreaView
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <ActivityIndicator size="large" color="#9b59b6" />
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Year:</Text>
+        <TextInput
+          style={styles.input}
+          value={year}
+          onChangeText={setYear}
+          placeholder="Ex: 2024"
+          placeholderTextColor="#b0b0b0"
+          keyboardType="numeric"
+        />
+      </View>
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Month:</Text>
+        <TextInput
+          style={styles.input}
+          value={month}
+          onChangeText={setMonth}
+          placeholder="Ex: June"
+          placeholderTextColor="#b0b0b0"
+        />
+      </View>
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Income:</Text>
+        <TextInput
+          style={styles.input}
+          value={income}
+          onChangeText={setIncome}
+          placeholder="Ex: 2500"
+          placeholderTextColor="#b0b0b0"
+          keyboardType="numeric"
+        />
+      </View>
+      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+        <Text style={styles.buttonText}>Add Income</Text>
+      </TouchableOpacity>
+
+      <Text
+        style={{
+          fontSize: 16,
+          fontWeight: "bold",
+          marginTop: 32,
+          marginBottom: 8,
+        }}
+      >
+        Past Income:
+      </Text>
+      <View style={styles.tableHeader}>
+        <Text style={styles.headerCell}>Year</Text>
+        <Text style={styles.headerCell}>Month</Text>
+        <Text style={styles.headerCell}>Income</Text>
+      </View>
+      <FlatList
+        data={incomeData}
+        keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.tableRow}>
+            <Text style={styles.cell}>{item.year}</Text>
+            <Text style={styles.cell}>{item.month}</Text>
+            <Text style={styles.cellIncome}>{item.income}</Text>
+          </View>
+        )}
+        contentContainerStyle={{ paddingBottom: 16 }}
+      />
+    </SafeAreaView>
+  );
+}
+
+//Styles
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff", padding: 24 },
   inputGroup: { marginBottom: 20 },
@@ -72,7 +213,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#333",
   },
-  cellincome: {
+  cellIncome: {
     flex: 1,
     minWidth: 70,
     fontSize: 16,
@@ -81,132 +222,3 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
-
-export default function Income() {
-  const [year, setYear] = useState("");
-  const [month, setMonth] = useState("");
-  const [income, setIncome] = useState("");
-  const [incomeData, setIncomeData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-
-  const handleSubmit = async () => {
-    if (!year || !month || !income) {
-      alert("Please fill in all fields.");
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from("Income")
-        .insert([
-          {
-            year: parseInt(year),
-            month: month.trim().toLowerCase(),
-            income: parseInt(income),
-          },
-        ]);
-        fetchIncome();
-
-      if (error) throw error;
-
-      console.log("Success");
-      setYear("");
-      setMonth("");
-      setIncome("");
-    } catch (err) {
-      alert("Failed to add income.");
-      console.error("Supabase insert error", err);
-    }
-  };
-
-  const fetchIncome = async () => {
-    const { data, error } = await supabase
-      .from("Income")
-      .select("*");
-
-    if (error) {
-      console.error("Error fetching income:", error);
-    } else {
-      setIncomeData(data || []);
-    }
-
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchIncome();
-  }, []);
-  if (loading) {
-    return (
-      <ActivityIndicator
-        style={{ marginTop: 50 }}
-        size="large"
-        color="#9b59b6"
-      />
-    );
-  }
-
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Year:</Text>
-        <TextInput
-          style={styles.input}
-          value={year}
-          onChangeText={setYear}
-          placeholder="Ex: 2024"
-          placeholderTextColor="#b0b0b0"
-          keyboardType="numeric"
-        />
-      </View>
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Month:</Text>
-        <TextInput
-          style={styles.input}
-          value={month}
-          onChangeText={setMonth}
-          placeholder="Ex: June"
-          placeholderTextColor="#b0b0b0"
-        />
-      </View>
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Income:</Text>
-        <TextInput
-          style={styles.input}
-          value={income}
-          onChangeText={setIncome}
-          placeholder="Ex: 2500"
-          placeholderTextColor="#b0b0b0"
-          keyboardType="numeric"
-        />
-      </View>
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Add Income</Text>
-      </TouchableOpacity>
-
-      <Text style={{ fontSize: 16, fontWeight: "bold", marginTop: 32, marginBottom: 8 }}>
-        Past Income:
-      </Text>
-      <View style={styles.tableHeader}>
-        <Text style={styles.headerCell}>Year</Text>
-        <Text style={styles.headerCell}>Month</Text>
-        <Text style={styles.headerCell}>Income</Text>
-      </View>
-      <FlatList
-        data={incomeData}
-        keyExtractor={(item, index) => item.id?.toString() || index.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.tableRow}>
-            <Text style={styles.cell}>{item.year}</Text>
-            <Text style={styles.cell}>{item.month}</Text>
-            <Text style={styles.cellincome}>{item.income}</Text>
-          </View>
-        )}
-        contentContainerStyle={{ paddingBottom: 16 }}
-      />
-    </SafeAreaView>
-  );
-}
-
-

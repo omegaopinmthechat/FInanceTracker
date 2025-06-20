@@ -1,15 +1,77 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text,TouchableOpacity ,StyleSheet, TextInput, View } from "react-native";
-import React, { useState } from "react";
+import {
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  TextInput,
+  View,
+  ActivityIndicator,
+  FlatList,
+} from "react-native";
+import React, { useEffect, useState } from "react";
+import { supabase } from "@/utils/supabase";
 
 export default function Expense() {
   const [year, setYear] = useState("");
   const [month, setMonth] = useState("");
   const [expense, setExpense] = useState("");
+  const [expenseData, setExpenseData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleSubmit = () => {
-    // Handle submit logic here
+  const handleSubmit = async () => {
+    if (!year || !month || !expense) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.from("Expense").insert([
+        {
+          year: parseInt(year),
+          month: month.trim().toLowerCase(),
+          expense: parseInt(expense),
+        },
+      ]);
+      fetchExpense();
+
+      if (error) throw error;
+
+      console.log("Success");
+
+      setYear("");
+      setMonth("");
+      setExpense("");
+    } catch (error) {
+      alert("Failed to add expense.");
+      console.log("Supabase insert error", error);
+    }
   };
+
+  const fetchExpense = async () => {
+    const { data, error } = await supabase.from("Expense").select("*");
+
+    if (error) console.log("Error fetching data");
+    setExpenseData(data || []);
+
+    setLoading(false);
+  };
+  useEffect(() => {
+    fetchExpense();
+  }, []);
+
+  //Loading
+  if (loading) {
+    return (
+      <SafeAreaView
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <ActivityIndicator size="large" color="#9b59b6" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -46,12 +108,41 @@ export default function Expense() {
         />
       </View>
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-              <Text style={styles.buttonText}>Add Expense</Text>
-            </TouchableOpacity>
+        <Text style={styles.buttonText}>Add Expense</Text>
+      </TouchableOpacity>
+
+      <Text
+        style={{
+          fontSize: 16,
+          fontWeight: "bold",
+          marginTop: 32,
+          marginBottom: 8,
+        }}
+      >
+        Past Expense:
+      </Text>
+      <View style={styles.tableHeader}>
+        <Text style={styles.headerCell}>Year</Text>
+        <Text style={styles.headerCell}>Month</Text>
+        <Text style={styles.headerCell}>Expense</Text>
+      </View>
+      <FlatList
+        data={expenseData}
+        keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.tableRow}>
+            <Text style={styles.cell}>{item.year}</Text>
+            <Text style={styles.cell}>{item.month}</Text>
+            <Text style={styles.cellExpense}>{item.expense}</Text>
+          </View>
+        )}
+        contentContainerStyle={{ paddingBottom: 16 }}
+      />
     </SafeAreaView>
   );
 }
 
+//Styles
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff", padding: 24 },
   inputGroup: { marginBottom: 20 },
@@ -63,6 +154,15 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     fontSize: 16,
     color: "#333",
+  },
+  tableRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderColor: "#eee",
+    minHeight: 36,
   },
   button: {
     backgroundColor: "#9b59b6",
@@ -76,5 +176,35 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     letterSpacing: 1,
+  },
+  tableHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f3e5f5",
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    paddingVertical: 6,
+  },
+  headerCell: {
+    flex: 1,
+    minWidth: 70,
+    fontWeight: "bold",
+    fontSize: 16,
+    textAlign: "center",
+  },
+  cell: {
+    flex: 1,
+    minWidth: 70,
+    fontSize: 16,
+    textAlign: "center",
+    color: "#333",
+  },
+  cellExpense: {
+    flex: 1,
+    minWidth: 70,
+    fontSize: 16,
+    textAlign: "center",
+    color: "#FF0000",
+    fontWeight: "bold",
   },
 });
