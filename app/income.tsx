@@ -25,11 +25,16 @@ export default function Income() {
     }
 
     try {
-      const { data, error } = await supabase.from("Income").insert([
+      const {
+        data: { user },
+        error
+      } = await supabase.auth.getUser();
+      await supabase.from("Income").insert([
         {
           year: parseInt(year),
           month: month.trim().toLowerCase(),
           income: parseInt(income),
+          user_id: user?.id, 
         },
       ]);
       fetchIncome();
@@ -47,7 +52,13 @@ export default function Income() {
   };
 
   const fetchIncome = async () => {
-    const { data, error } = await supabase.from("Income").select("*");
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { data, error } = await supabase
+      .from("Income")
+      .select("*")
+      .eq("user_id", user?.id);
 
     if (error) {
       console.error("Error fetching income:", error);

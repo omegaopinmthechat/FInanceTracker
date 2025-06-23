@@ -1,21 +1,44 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import React, { useState } from "react";
+import { supabase } from "@/utils/supabase";
+import { sortRoutes } from "expo-router/build/sortRoutes";
 
 export default function Feedback() {
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!email || !subject || !message) {
       alert("Please fill in all fields.");
       return;
     }
-    alert("Thank you for your feedback!");
-    setEmail("");
-    setSubject("");
-    setMessage("");
+    try {
+      const { data, error } = await supabase.from("feedback").insert([
+        {
+          mail: email, 
+          subject,
+          message,
+        },
+      ]);
+      if (error) throw error;
+      console.log("FeedBack added");
+      alert("Thank you for your feedback!");
+
+      setEmail("");
+      setSubject("");
+      setMessage("");
+    } catch (error) {
+      console.log("Failed to add your feedback.");
+      alert("Failed to add your feedback. Please try after sometime.")
+    }
   };
 
   return (

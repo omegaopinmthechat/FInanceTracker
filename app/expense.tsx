@@ -25,11 +25,16 @@ export default function Expense() {
     }
 
     try {
-      const { data, error } = await supabase.from("Expense").insert([
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+      await supabase.from("Expense").insert([
         {
           year: parseInt(year),
           month: month.trim().toLowerCase(),
           expense: parseInt(expense),
+          user_id: user?.id, 
         },
       ]);
       fetchExpense();
@@ -48,7 +53,13 @@ export default function Expense() {
   };
 
   const fetchExpense = async () => {
-    const { data, error } = await supabase.from("Expense").select("*");
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { data, error } = await supabase
+      .from("Expense")
+      .select("*")
+      .eq("user_id", user?.id);
 
     if (error) console.log("Error fetching data");
     setExpenseData(data || []);
@@ -59,7 +70,6 @@ export default function Expense() {
     fetchExpense();
   }, []);
 
-  //Loading
   if (loading) {
     return (
       <SafeAreaView
@@ -142,7 +152,6 @@ export default function Expense() {
   );
 }
 
-//Styles
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff", padding: 24 },
   inputGroup: { marginBottom: 20 },
