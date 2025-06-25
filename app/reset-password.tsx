@@ -1,8 +1,8 @@
-import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import React, { useState } from "react";
 import { supabase } from "@/utils/supabase";
 import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ResetPassword() {
   const [email, setEmail] = useState("");
