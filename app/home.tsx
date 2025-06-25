@@ -4,9 +4,10 @@ import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
+  ScrollView,
   StyleSheet,
   Text,
-  View,
+  View
 } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -100,35 +101,29 @@ const Home = () => {
   const updateChartData = () => {
     if (!selectedYear) return;
 
+    // Expense: always show all months, fill missing with 0
     const expenseForYear = expenseData.filter((item) => item.year === selectedYear);
     const expenseByMonth: { [month: string]: number } = {};
     expenseForYear.forEach((item) => {
       const month = item.month.toLowerCase();
       expenseByMonth[month] = (expenseByMonth[month] || 0) + Number(item.expense);
     });
-    const expenseLabels = monthOrder
-      .filter((m) => expenseByMonth[m] !== undefined)
-      .map((m, i) => monthAbbr[i]);
-    const expenseValues = monthOrder
-      .filter((m) => expenseByMonth[m] !== undefined)
-      .map((m) => expenseByMonth[m]);
+    const expenseLabels = monthAbbr;
+    const expenseValues = monthOrder.map((m) => expenseByMonth[m] || 0);
     setExpenseChartData({
       labels: expenseLabels,
       datasets: [{ data: expenseValues }],
     });
 
+    // Income: always show all months, fill missing with 0
     const incomeForYear = incomeData.filter((item) => item.year === selectedYear);
     const incomeByMonth: { [month: string]: number } = {};
     incomeForYear.forEach((item) => {
       const month = item.month.toLowerCase();
       incomeByMonth[month] = (incomeByMonth[month] || 0) + Number(item.income);
     });
-    const incomeLabels = monthOrder
-      .filter((m) => incomeByMonth[m] !== undefined)
-      .map((m, i) => monthAbbr[i]);
-    const incomeValues = monthOrder
-      .filter((m) => incomeByMonth[m] !== undefined)
-      .map((m) => incomeByMonth[m]);
+    const incomeLabels = monthAbbr;
+    const incomeValues = monthOrder.map((m) => incomeByMonth[m] || 0);
     setIncomeChartData({
       labels: incomeLabels,
       datasets: [{ data: incomeValues }],
@@ -156,6 +151,9 @@ const Home = () => {
     );
   }
 
+  const chartBoxWidth = Dimensions.get("window").width - 20; // visible box width
+  const chartContentWidth = 900; // actual chart width (for all months)
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Monthly Expense</Text>
@@ -173,64 +171,63 @@ const Home = () => {
           ))}
         </Picker>
       </View>
-      {expenseChartData.labels.length > 1 ? (
-        <LineChart
-          data={expenseChartData}
-          width={Dimensions.get("window").width - 20}
-          height={220}
-          yAxisLabel="₹"
-          chartConfig={{
-            backgroundColor: "#800080",
-            backgroundGradientFrom: "#800080",
-            backgroundGradientTo: "#4B0082",
-            decimalPlaces: 0,
-            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            style: { borderRadius: 16 },
-            propsForDots: {
-              r: "6",
-              strokeWidth: "2",
-              stroke: "#ffa726",
-            },
-          }}
-          bezier
-          style={{ marginVertical: 8, borderRadius: 16 }}
-        />
-      ) : (
-        <Text style={{ color: "gray", padding: 20 }}>
-          Not enough expense data to display chart.
-        </Text>
-      )}
+      <View style={{ width: chartBoxWidth, alignSelf: "center", borderRadius: 16, overflow: "hidden", backgroundColor: "#800080" }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <LineChart
+            data={expenseChartData}
+            width={chartContentWidth}
+            height={220}
+            yAxisLabel="₹"
+            chartConfig={{
+              backgroundColor: "#800080",
+              backgroundGradientFrom: "#800080",
+              backgroundGradientTo: "#4B0082",
+              decimalPlaces: 0,
+              color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+              style: { borderRadius: 16 },
+              propsForDots: {
+                r: "3", // thinner dots
+                strokeWidth: "1", // thinner border
+                stroke: "#ffa726",
+              },
+              propsForBackgroundLines: {
+                strokeWidth: 0.5, // thinner grid lines
+              },
+            }}
+            bezier={false} // set to false for straight lines, or keep true for curves
+            style={{ borderRadius: 16 }}
+          />
+        </ScrollView>
+      </View>
 
       <Text style={styles.title}>Monthly Income</Text>
-      {incomeChartData.labels.length > 1 ? (
-        <LineChart
-          data={incomeChartData}
-          width={Dimensions.get("window").width - 20}
-          height={220}
-          yAxisLabel="₹"
-          chartConfig={{
-            backgroundColor: "#27ae60",
-            backgroundGradientFrom: "#27ae60",
-            backgroundGradientTo: "#145a32",
-            decimalPlaces: 0,
-            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            style: { borderRadius: 16 },
-            propsForDots: {
-              r: "6",
-              strokeWidth: "2",
-              stroke: "#ffa726",
-            },
-          }}
-          bezier
-          style={{ marginVertical: 8, borderRadius: 16 }}
-        />
-      ) : (
-        <Text style={{ color: "gray", padding: 20 }}>
-          Not enough income data to display chart.
-        </Text>
-      )}
+      <View style={{ width: chartBoxWidth, alignSelf: "center", borderRadius: 16, overflow: "hidden", backgroundColor: "#27ae60" }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <LineChart
+            data={incomeChartData}
+            width={chartContentWidth}
+            height={220}
+            yAxisLabel="₹"
+            chartConfig={{
+              backgroundColor: "#27ae60",
+              backgroundGradientFrom: "#27ae60",
+              backgroundGradientTo: "#145a32",
+              decimalPlaces: 0,
+              color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+              style: { borderRadius: 16 },
+              propsForDots: {
+                r: "6",
+                strokeWidth: "2",
+                stroke: "#ffa726",
+              },
+            }}
+            bezier
+            style={{ borderRadius: 16 }}
+          />
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 };
