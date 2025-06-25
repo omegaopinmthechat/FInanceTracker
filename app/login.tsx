@@ -1,12 +1,14 @@
-import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import React, { useState } from "react";
 import { supabase } from "@/utils/supabase";
+import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const handleLogin = async () => {
@@ -39,14 +41,27 @@ export default function Login() {
       </View>
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Password:</Text>
-        <TextInput
-          style={styles.input}
-          value={password}
-          onChangeText={setPassword}
-          placeholder="Password"
-          placeholderTextColor="#b0b0b0"
-          secureTextEntry
-        />
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <TextInput
+            style={[styles.input, { flex: 1, paddingRight: 40 }]}
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Password"
+            placeholderTextColor="#b0b0b0"
+            secureTextEntry={!showPassword}
+          />
+          <TouchableOpacity
+            style={styles.eyeIcon}
+            onPress={() => setShowPassword((prev) => !prev)}
+            activeOpacity={0.7}
+          >
+            <Feather
+              name={showPassword ? "eye" : "eye-off"}
+              size={22}
+              color="#9b59b6"
+            />
+          </TouchableOpacity>
+        </View>
       </View>
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Sign In</Text>
@@ -93,5 +108,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     textDecorationLine: "underline",
+  },
+  eyeIcon: {
+    position: "absolute",
+    right: 12,
+    top: 10,
+    padding: 4,
   },
 });

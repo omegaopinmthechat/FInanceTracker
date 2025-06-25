@@ -1,19 +1,41 @@
-import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  Text,
-  StyleSheet,
-  TextInput,
-  View,
-  TouchableOpacity,
-  FlatList,
-} from "react-native";
-import React, { useState, useEffect } from "react";
 import { supabase } from "@/utils/supabase";
+import { Feather } from "@expo/vector-icons";
+import { Picker } from "@react-native-picker/picker";
+import React, { useEffect, useState } from "react";
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { ActivityIndicator } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+const months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+const years = Array.from({ length: 11 }, (_, i) => (2020 + i).toString());
 
 export default function Income() {
-  const [year, setYear] = useState("");
-  const [month, setMonth] = useState("");
+  const now = new Date();
+  const currentMonth = months[now.getMonth()].toLowerCase();
+  const currentYear = now.getFullYear().toString();
+
+  const [year, setYear] = useState(currentYear);
+  const [month, setMonth] = useState(currentMonth);
   const [income, setIncome] = useState("");
   const [incomeData, setIncomeData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,8 +64,8 @@ export default function Income() {
       if (error) throw error;
 
       console.log("Success");
-      setYear("");
-      setMonth("");
+      setYear(currentYear);
+      setMonth(currentMonth);
       setIncome("");
     } catch (err) {
       alert("Failed to add income.");
@@ -69,7 +91,6 @@ export default function Income() {
     setLoading(false);
   };
 
-  //Loading
   useEffect(() => {
     fetchIncome();
   }, []);
@@ -86,28 +107,47 @@ export default function Income() {
     );
   }
 
+  const handleDelete = async (id: number) => {
+    try {
+      await supabase.from("Income").delete().eq("id", id);
+      fetchIncome();
+    } catch (err) {
+      alert("Failed to delete income.");
+      console.log("Supabase delete error", err);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Year:</Text>
-        <TextInput
-          style={styles.input}
-          value={year}
-          onChangeText={setYear}
-          placeholder="Ex: 2024"
-          placeholderTextColor="#b0b0b0"
-          keyboardType="numeric"
-        />
+        <View style={{ backgroundColor: "#ededed", borderRadius: 8 }}>
+          <Picker
+            selectedValue={year}
+            onValueChange={(itemValue) => setYear(itemValue)}
+            style={{ color: "#333" }}
+          >
+            <Picker.Item label="Select Year" value="" />
+            {years.map((y) => (
+              <Picker.Item key={y} label={y} value={y} />
+            ))}
+          </Picker>
+        </View>
       </View>
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Month:</Text>
-        <TextInput
-          style={styles.input}
-          value={month}
-          onChangeText={setMonth}
-          placeholder="Ex: June"
-          placeholderTextColor="#b0b0b0"
-        />
+        <View style={{ backgroundColor: "#ededed", borderRadius: 8 }}>
+          <Picker
+            selectedValue={month}
+            onValueChange={(itemValue) => setMonth(itemValue)}
+            style={{ color: "#333" }}
+          >
+            <Picker.Item label="Select Month" value="" />
+            {months.map((m) => (
+              <Picker.Item key={m} label={m} value={m.toLowerCase()} />
+            ))}
+          </Picker>
+        </View>
       </View>
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Income:</Text>
@@ -147,6 +187,12 @@ export default function Income() {
             <Text style={styles.cell}>{item.year}</Text>
             <Text style={styles.cell}>{item.month}</Text>
             <Text style={styles.cellIncome}>{item.income}</Text>
+            <TouchableOpacity
+              onPress={() => handleDelete(item.id)}
+              style={{ padding: 4, marginLeft: 8 }}
+            >
+              <Feather name="trash-2" size={20} color="#e74c3c" />
+            </TouchableOpacity>
           </View>
         )}
         contentContainerStyle={{ paddingBottom: 16 }}
@@ -155,7 +201,6 @@ export default function Income() {
   );
 }
 
-//Styles
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff", padding: 24 },
   inputGroup: { marginBottom: 20 },
