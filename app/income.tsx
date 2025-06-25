@@ -9,6 +9,9 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  ScrollView,
+  Dimensions,
+  Platform,
 } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -28,6 +31,9 @@ const months = [
   "December",
 ];
 const years = Array.from({ length: 11 }, (_, i) => (2020 + i).toString());
+
+const screenWidth = Dimensions.get("window").width;
+const contentMaxWidth = 420;
 
 export default function Income() {
   const now = new Date();
@@ -63,7 +69,6 @@ export default function Income() {
 
       if (error) throw error;
 
-      console.log("Success");
       setYear(currentYear);
       setMonth(currentMonth);
       setIncome("");
@@ -94,6 +99,17 @@ export default function Income() {
   useEffect(() => {
     fetchIncome();
   }, []);
+
+  const handleDelete = async (id: number) => {
+    try {
+      await supabase.from("Income").delete().eq("id", id);
+      fetchIncome();
+    } catch (err) {
+      alert("Failed to delete income.");
+      console.log("Supabase delete error", err);
+    }
+  };
+
   if (loading) {
     return (
       <SafeAreaView
@@ -107,103 +123,106 @@ export default function Income() {
     );
   }
 
-  const handleDelete = async (id: number) => {
-    try {
-      await supabase.from("Income").delete().eq("id", id);
-      fetchIncome();
-    } catch (err) {
-      alert("Failed to delete income.");
-      console.log("Supabase delete error", err);
-    }
-  };
-
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Year:</Text>
-        <View style={{ backgroundColor: "#ededed", borderRadius: 8 }}>
-          <Picker
-            selectedValue={year}
-            onValueChange={(itemValue) => setYear(itemValue)}
-            style={{ color: "#333" }}
-          >
-            <Picker.Item label="Select Year" value="" />
-            {years.map((y) => (
-              <Picker.Item key={y} label={y} value={y} />
-            ))}
-          </Picker>
-        </View>
-      </View>
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Month:</Text>
-        <View style={{ backgroundColor: "#ededed", borderRadius: 8 }}>
-          <Picker
-            selectedValue={month}
-            onValueChange={(itemValue) => setMonth(itemValue)}
-            style={{ color: "#333" }}
-          >
-            <Picker.Item label="Select Month" value="" />
-            {months.map((m) => (
-              <Picker.Item key={m} label={m} value={m.toLowerCase()} />
-            ))}
-          </Picker>
-        </View>
-      </View>
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Income:</Text>
-        <TextInput
-          style={styles.input}
-          value={income}
-          onChangeText={setIncome}
-          placeholder="Ex: 2500"
-          placeholderTextColor="#b0b0b0"
-          keyboardType="numeric"
-        />
-      </View>
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Add Income</Text>
-      </TouchableOpacity>
-
-      <Text
-        style={{
-          fontSize: 16,
-          fontWeight: "bold",
-          marginTop: 32,
-          marginBottom: 8,
-        }}
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          { maxWidth: contentMaxWidth, width: "100%", alignSelf: "center" },
+        ]}
+        keyboardShouldPersistTaps="handled"
       >
-        Past Income:
-      </Text>
-      <View style={styles.tableHeader}>
-        <Text style={styles.headerCell}>Year</Text>
-        <Text style={styles.headerCell}>Month</Text>
-        <Text style={styles.headerCell}>Income</Text>
-      </View>
-      <FlatList
-        data={incomeData}
-        keyExtractor={(item, index) => item.id?.toString() || index.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.tableRow}>
-            <Text style={styles.cell}>{item.year}</Text>
-            <Text style={styles.cell}>{item.month}</Text>
-            <Text style={styles.cellIncome}>{item.income}</Text>
-            <TouchableOpacity
-              onPress={() => handleDelete(item.id)}
-              style={{ padding: 4, marginLeft: 8 }}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Year:</Text>
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={year}
+              onValueChange={(itemValue) => setYear(itemValue)}
+              style={styles.picker}
+              itemStyle={styles.pickerItem}
             >
-              <Feather name="trash-2" size={20} color="#e74c3c" />
-            </TouchableOpacity>
+              <Picker.Item label="Select Year" value="" />
+              {years.map((y) => (
+                <Picker.Item key={y} label={y} value={y} />
+              ))}
+            </Picker>
           </View>
-        )}
-        contentContainerStyle={{ paddingBottom: 16 }}
-      />
+        </View>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Month:</Text>
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={month}
+              onValueChange={(itemValue) => setMonth(itemValue)}
+              style={styles.picker}
+              itemStyle={styles.pickerItem}
+            >
+              <Picker.Item label="Select Month" value="" />
+              {months.map((m) => (
+                <Picker.Item key={m} label={m} value={m.toLowerCase()} />
+              ))}
+            </Picker>
+          </View>
+        </View>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Income:</Text>
+          <TextInput
+            style={styles.input}
+            value={income}
+            onChangeText={setIncome}
+            placeholder="Ex: 2500"
+            placeholderTextColor="#b0b0b0"
+            keyboardType="numeric"
+          />
+        </View>
+        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+          <Text style={styles.buttonText}>Add Income</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.sectionTitle}>Past Income:</Text>
+        <ScrollView horizontal>
+          <View style={{ minWidth: screenWidth - 32 }}>
+            <View style={styles.tableHeader}>
+              <Text style={styles.headerCell}>Year</Text>
+              <Text style={styles.headerCell}>Month</Text>
+              <Text style={styles.headerCell}>Income</Text>
+            </View>
+            <FlatList
+              data={incomeData}
+              keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+              renderItem={({ item }) => (
+                <View style={styles.tableRow}>
+                  <Text style={styles.cell}>{item.year}</Text>
+                  <Text style={styles.cell}>{item.month}</Text>
+                  <Text style={styles.cellIncome}>{item.income}</Text>
+                  <TouchableOpacity
+                    onPress={() => handleDelete(item.id)}
+                    style={{ padding: 4, marginLeft: 8 }}
+                  >
+                    <Feather name="trash-2" size={20} color="#e74c3c" />
+                  </TouchableOpacity>
+                </View>
+              )}
+              contentContainerStyle={{ paddingBottom: 16 }}
+              style={{ minWidth: screenWidth - 32 }}
+            />
+          </View>
+        </ScrollView>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 24 },
-  inputGroup: { marginBottom: 20 },
+  container: { flex: 1, backgroundColor: "#fff", padding: 0 },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: "flex-start",
+    alignItems: "center",
+    padding: 16,
+    paddingBottom: 32,
+  },
+  inputGroup: { marginBottom: 20, width: "100%" },
   label: { fontSize: 18, fontWeight: "500", marginBottom: 6 },
   input: {
     backgroundColor: "#ededed",
@@ -212,6 +231,22 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     fontSize: 16,
     color: "#333",
+    width: "100%",
+    minWidth: 0,
+  },
+  pickerWrapper: {
+    backgroundColor: "#ededed",
+    borderRadius: 8,
+    width: "100%",
+    overflow: "hidden",
+  },
+  picker: {
+    width: "100%",
+    color: "#333",
+    backgroundColor: "transparent",
+  },
+  pickerItem: {
+    fontSize: 16,
   },
   button: {
     backgroundColor: "#9b59b6",
@@ -219,6 +254,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     marginTop: 16,
+    width: "100%",
   },
   buttonText: {
     color: "#fff",
@@ -226,17 +262,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     letterSpacing: 1,
   },
-  item: {
-    backgroundColor: "#f3e5f5",
-    padding: 16,
-    marginBottom: 12,
-    borderRadius: 10,
-    elevation: 2,
-  },
-  text: {
+  sectionTitle: {
     fontSize: 16,
-    color: "#333",
-    marginBottom: 4,
+    fontWeight: "bold",
+    marginTop: 32,
+    marginBottom: 8,
+    alignSelf: "flex-start",
   },
   tableHeader: {
     flexDirection: "row",

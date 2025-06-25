@@ -151,8 +151,8 @@ const Home = () => {
     );
   }
 
-  const chartBoxWidth = Dimensions.get("window").width - 20; // visible box width
-  const chartContentWidth = 900; // actual chart width (for all months)
+  const chartBoxWidth = Math.min(Dimensions.get("window").width - 20, 420); // max 420 for large screens
+  const chartContentWidth = Math.max(chartBoxWidth, 900); // chart scrolls if needed
 
   return (
     <SafeAreaView style={styles.container}>
@@ -171,7 +171,7 @@ const Home = () => {
           ))}
         </Picker>
       </View>
-      <View style={{ width: chartBoxWidth, alignSelf: "center", borderRadius: 16, overflow: "hidden", backgroundColor: "#800080" }}>
+      <View style={[styles.chartBox, { width: chartBoxWidth }]}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <LineChart
             data={expenseChartData}
@@ -202,7 +202,7 @@ const Home = () => {
       </View>
 
       <Text style={styles.title}>Monthly Income</Text>
-      <View style={{ width: chartBoxWidth, alignSelf: "center", borderRadius: 16, overflow: "hidden", backgroundColor: "#27ae60" }}>
+      <View style={[styles.chartBox, { width: chartBoxWidth }]}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <LineChart
             data={incomeChartData}
@@ -239,6 +239,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginVertical: 10,
+  },
+  chartBox: {
+    alignSelf: "center",
+    borderRadius: 16,
+    overflow: "hidden",
+    backgroundColor: "#800080",
+    marginBottom: 16,
   },
 });
 
