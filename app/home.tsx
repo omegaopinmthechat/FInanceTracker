@@ -151,83 +151,88 @@ const Home = () => {
     );
   }
 
-  const chartBoxWidth = Math.min(Dimensions.get("window").width - 20, 420); // max 420 for large screens
-  const chartContentWidth = Math.max(chartBoxWidth, 900); // chart scrolls if needed
+  const chartBoxWidth = Math.min(Dimensions.get("window").width - 20, 420);
+  const chartContentWidth = Math.max(chartBoxWidth, 900);
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Monthly Expense</Text>
-      <View style={styles.pickerContainer}>
-        <Text style={{ fontWeight: "bold", marginRight: 10 }}>
-          Select Year:
-        </Text>
-        <Picker
-          selectedValue={selectedYear}
-          style={{ height: 50, width: 160 }}
-          onValueChange={(itemValue) => setSelectedYear(itemValue)}
-        >
-          {availableYears.map((year) => (
-            <Picker.Item key={year} label={`${year}`} value={year} />
-          ))}
-        </Picker>
-      </View>
-      <View style={[styles.chartBox, { width: chartBoxWidth }]}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <LineChart
-            data={expenseChartData}
-            width={chartContentWidth}
-            height={220}
-            yAxisLabel="₹"
-            chartConfig={{
-              backgroundColor: "#800080",
-              backgroundGradientFrom: "#800080",
-              backgroundGradientTo: "#4B0082",
-              decimalPlaces: 0,
-              color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-              style: { borderRadius: 16 },
-              propsForDots: {
-                r: "3", // thinner dots
-                strokeWidth: "1", // thinner border
-                stroke: "#ffa726",
-              },
-              propsForBackgroundLines: {
-                strokeWidth: 0.5, // thinner grid lines
-              },
-            }}
-            bezier={false} // set to false for straight lines, or keep true for curves
-            style={{ borderRadius: 16 }}
-          />
-        </ScrollView>
-      </View>
+      <ScrollView
+        contentContainerStyle={{ alignItems: "center", paddingBottom: 32 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.title}>Monthly Expense</Text>
+        <View style={styles.pickerContainer}>
+          <Text style={{ fontWeight: "bold", marginRight: 10 }}>
+            Select Year:
+          </Text>
+          <Picker
+            selectedValue={selectedYear}
+            style={{ height: 50, width: 160 }}
+            onValueChange={(itemValue) => setSelectedYear(itemValue)}
+          >
+            {availableYears.map((year) => (
+              <Picker.Item key={year} label={`${year}`} value={year} />
+            ))}
+          </Picker>
+        </View>
+        <View style={[styles.chartBox, { width: chartBoxWidth }]}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <LineChart
+              data={expenseChartData}
+              width={chartContentWidth}
+              height={220}
+              yAxisLabel="₹"
+              chartConfig={{
+                backgroundColor: "#800080",
+                backgroundGradientFrom: "#800080",
+                backgroundGradientTo: "#4B0082",
+                decimalPlaces: 0,
+                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                style: { borderRadius: 16 },
+                propsForDots: {
+                  r: "3",
+                  strokeWidth: "1",
+                  stroke: "#ffa726",
+                },
+                propsForBackgroundLines: {
+                  strokeWidth: 0.5,
+                },
+              }}
+              bezier={false}
+              style={{ borderRadius: 16 }}
+            />
+          </ScrollView>
+        </View>
 
-      <Text style={styles.title}>Monthly Income</Text>
-      <View style={[styles.chartBox, { width: chartBoxWidth }]}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <LineChart
-            data={incomeChartData}
-            width={chartContentWidth}
-            height={220}
-            yAxisLabel="₹"
-            chartConfig={{
-              backgroundColor: "#27ae60",
-              backgroundGradientFrom: "#27ae60",
-              backgroundGradientTo: "#145a32",
-              decimalPlaces: 0,
-              color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-              style: { borderRadius: 16 },
-              propsForDots: {
-                r: "6",
-                strokeWidth: "2",
-                stroke: "#ffa726",
-              },
-            }}
-            bezier
-            style={{ borderRadius: 16 }}
-          />
-        </ScrollView>
-      </View>
+        <Text style={styles.title}>Monthly Income</Text>
+        <View style={[styles.chartBox, { width: chartBoxWidth }]}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <LineChart
+              data={incomeChartData}
+              width={chartContentWidth}
+              height={220}
+              yAxisLabel="₹"
+              chartConfig={{
+                backgroundColor: "#27ae60",
+                backgroundGradientFrom: "#27ae60",
+                backgroundGradientTo: "#145a32",
+                decimalPlaces: 0,
+                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                style: { borderRadius: 16 },
+                propsForDots: {
+                  r: "6",
+                  strokeWidth: "2",
+                  stroke: "#ffa726",
+                },
+              }}
+              bezier
+              style={{ borderRadius: 16 }}
+            />
+          </ScrollView>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

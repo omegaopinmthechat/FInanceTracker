@@ -1,6 +1,7 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { Text, StyleSheet, TouchableOpacity } from "react-native";
 import { supabase } from "@/utils/supabase";
 import { useRouter, usePathname } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Header() {
   const router = useRouter();
@@ -14,48 +15,44 @@ export default function Header() {
   };
 
   return (
-    <View style={styles.header}>
+    <SafeAreaView style={styles.header}>
       <Text style={styles.title}>FInanceTracker</Text>
       {!hideLogout && (
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   header: {
     backgroundColor: "#9b59b6",
-    alignItems: "center",
-    justifyContent: "center",
-    height: 90,
-    width: "100%",
     flexDirection: "row",
-    position: "relative",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   title: {
-    top: 20,
     color: "#fff",
-    fontSize: 28,
+    fontSize: 20, 
     fontWeight: "bold",
     letterSpacing: 1,
     flex: 1,
     textAlign: "center",
   },
   logoutBtn: {
-    position: "absolute",
-    right: 20,
-    top: 40,
-    padding: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
     backgroundColor: "#fff",
     borderRadius: 6,
-    marginTop: 8,
   },
   logoutText: {
     color: "#9b59b6",
     fontWeight: "bold",
-    fontSize: 16,
+    fontSize: 14,
   },
 });
+
