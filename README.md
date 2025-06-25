@@ -1,9 +1,8 @@
 
 # 💸 FinanceTracker — Your Pocket-Sized Financial Dashboard 📊
 
-[![Platform](https://img.shields.io/badge/Built%20With-Expo%20React%20Native-blue.svg)](https://reactnative.dev/)
+[![Platform](https://img.shields.io/badge/Built%20With-Expo%20React%20Native-blue.svg)](https://docs.expo.dev/)
 [![Data Source](https://img.shields.io/badge/Backend-Supabase-%2300A37A)](https://supabase.com/)
-[![License](https://img.shields.io/github/license/omegaopinmthechat/FInanceTracker)](LICENSE)
 
 Welcome to **FinanceTracker**, a beautifully minimal yet powerful personal finance visualizer. Track your **monthly expenses and income** with sleek, interactive charts — powered by React Native, Expo, and Supabase.
 
@@ -30,8 +29,17 @@ Vibrant gradients for charts, easy-to-read labels, and modern styling — all wi
 
 ## 📹 Sneak Peek
 
-https://user-images.githubusercontent.com/your-demo-link.gif  
-<!-- Replace with video-to-GIF or YouTube demo if hosting -->
+<p align="center">
+  <img src="./images/signup.png" width="200"/>
+  <img src="./images/login.png" width="200"/>
+  <img src="./images/home1.png" width="200"/>
+  <img src="./images/home2.png" width="200"/>
+  <img src="./images/income.png" width="200"/>
+  <img src="./images/income2.png" width="200"/>
+  <img src="./images/expense.png" width="200"/>
+  <img src="./images/expense2.png" width="200"/>
+  <img src="./images/feedback.png" width="200"/>
+</p>
 
 ---
 
@@ -115,22 +123,12 @@ Scan the QR code with your phone using Expo Go, or run on Android/iOS simulator.
 ## 🧠 Future Improvements
 
 - 📅 Add date-range filtering
-- 📝 Add budget planning and reminders
+- 📝 AI budget planner
 - 🌑 Dark mode toggle
-- 📊 Pie chart breakdowns by category
+
+
 
 ---
 
-## 🙌 Contributing
-
-Feel free to fork and improve! Pull requests and issues are warmly welcomed.
-
----
-
-## 📜 License
-
-MIT © [omegaopinmthechat](https://github.com/omegaopinmthechat)
-
----
 
 > 💬 “Visualize your money, control your story.”
