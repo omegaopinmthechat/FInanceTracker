@@ -1,4 +1,4 @@
-package com.omegaopinmthechat.client
+package com.omegaopinmthechat.financetracker
 
 import android.app.Application
 import android.content.res.Configuration

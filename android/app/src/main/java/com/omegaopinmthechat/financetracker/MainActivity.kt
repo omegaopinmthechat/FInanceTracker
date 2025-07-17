@@ -1,4 +1,4 @@
-package com.omegaopinmthechat.client
+package com.omegaopinmthechat.financetracker
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build
