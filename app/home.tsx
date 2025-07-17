@@ -9,7 +9,7 @@ import {
   Text,
   View
 } from "react-native";
-import { LineChart } from "react-native-chart-kit";
+import { LineChart, PieChart } from "react-native-chart-kit";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors, shadows } from '@/theme/colors';
 
@@ -176,7 +176,7 @@ const Home = () => {
                   key={year} 
                   label={`${year}`} 
                   value={year}
-                  color="#000" // Set dropdown item text color to black
+                  color="#000" 
                 />
               ))}
             </Picker>
@@ -246,6 +246,81 @@ const Home = () => {
             />
           </ScrollView>
         </View>
+
+        {/* --- New Visualizations Section --- */}
+        <View style={styles.visualSection}>
+          <Text style={styles.visualTitle}>Summary</Text>
+          <View style={styles.summaryRow}>
+            <View style={[styles.summaryCard, { borderColor: colors.error }]}>
+              <Text style={styles.summaryLabel}>Total Expense</Text>
+              <Text style={[styles.summaryValue, { color: colors.error }]}>
+                ₹{expenseData.filter(e => e.year === selectedYear).reduce((sum, e) => sum + Number(e.expense), 0)}
+              </Text>
+            </View>
+            <View style={[styles.summaryCard, { borderColor: colors.success }]}>
+              <Text style={styles.summaryLabel}>Total Income</Text>
+              <Text style={[styles.summaryValue, { color: colors.success }]}>
+                ₹{incomeData.filter(i => i.year === selectedYear).reduce((sum, i) => sum + Number(i.income), 0)}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.balanceCard}>
+            <Text style={styles.summaryLabel}>Net Balance</Text>
+            <Text
+              style={[
+                styles.summaryValue,
+                {
+                  color:
+                    (incomeData.filter(i => i.year === selectedYear).reduce((sum, i) => sum + Number(i.income), 0) -
+                      expenseData.filter(e => e.year === selectedYear).reduce((sum, e) => sum + Number(e.expense), 0)) >= 0
+                      ? colors.success
+                      : colors.error,
+                },
+              ]}
+            >
+              ₹
+              {incomeData.filter(i => i.year === selectedYear).reduce((sum, i) => sum + Number(i.income), 0) -
+                expenseData.filter(e => e.year === selectedYear).reduce((sum, e) => sum + Number(e.expense), 0)}
+            </Text>
+          </View>
+
+          {/* --- Pie Chart Visualization --- */}
+          <View style={styles.pieChartContainer}>
+            <Text style={styles.visualTitle}>Income vs Expense</Text>
+            <PieChart
+              data={[
+                {
+                  name: "Expense",
+                  amount: expenseData.filter(e => e.year === selectedYear).reduce((sum, e) => sum + Number(e.expense), 0),
+                  color: colors.error,
+                  legendFontColor: colors.textPrimary,
+                  legendFontSize: 14,
+                },
+                {
+                  name: "Income",
+                  amount: incomeData.filter(i => i.year === selectedYear).reduce((sum, i) => sum + Number(i.income), 0),
+                  color: colors.success,
+                  legendFontColor: colors.textPrimary,
+                  legendFontSize: 14,
+                },
+              ]}
+              width={Dimensions.get("window").width - 48}
+              height={180}
+              chartConfig={{
+                color: () => colors.textPrimary,
+                labelColor: () => colors.textPrimary,
+                backgroundColor: colors.card,
+                backgroundGradientFrom: colors.card,
+                backgroundGradientTo: colors.card,
+              }}
+              accessor="amount"
+              backgroundColor="transparent"
+              paddingLeft="10"
+              absolute
+              hasLegend={true}
+            />
+          </View>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -314,6 +389,68 @@ const styles = StyleSheet.create({
   },
   chart: {
     borderRadius: 16,
+  },
+  visualSection: {
+    marginTop: 8,
+    marginBottom: 32,
+    padding: 16,
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.medium,
+  },
+  visualTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: colors.textPrimary,
+    marginBottom: 14,
+    letterSpacing: 0.5,
+  },
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+    gap: 12,
+  },
+  summaryCard: {
+    flex: 1,
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    padding: 14,
+    alignItems: "center",
+    marginHorizontal: 2,
+  },
+  summaryLabel: {
+    color: colors.textSecondary,
+    fontSize: 14,
+    marginBottom: 4,
+    fontWeight: "600",
+  },
+  summaryValue: {
+    fontSize: 20,
+    fontWeight: "bold",
+    letterSpacing: 0.5,
+  },
+  balanceCard: {
+    marginTop: 4,
+    backgroundColor: colors.surfaceHighlight,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: "center",
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+  },
+  pieChartContainer: {
+    marginTop: 18,
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.medium,
   },
 });
 
