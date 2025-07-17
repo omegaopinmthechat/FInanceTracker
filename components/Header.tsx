@@ -2,6 +2,8 @@ import { Text, StyleSheet, TouchableOpacity } from "react-native";
 import { supabase } from "@/utils/supabase";
 import { useRouter, usePathname } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
+import { colors, shadows, spacing, radii } from "@/theme/colors";
 
 export default function Header() {
   const router = useRouter();
@@ -15,43 +17,55 @@ export default function Header() {
   };
 
   return (
-    <SafeAreaView style={styles.header}>
-      <Text style={styles.title}>FInanceTracker</Text>
-      {!hideLogout && (
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Logout</Text>
-        </TouchableOpacity>
-      )}
-    </SafeAreaView>
+    <LinearGradient
+      colors={colors.headerGradient as [string, string]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0 }}
+      style={styles.gradient}
+    >
+      <SafeAreaView style={styles.header}>
+        <Text style={styles.title}>FinanceTracker</Text>
+        {!hideLogout && (
+          <TouchableOpacity
+            style={styles.logoutBtn}
+            onPress={handleLogout}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.logoutText}>Logout</Text>
+          </TouchableOpacity>
+        )}
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  gradient: {
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
   header: {
-    backgroundColor: "#9b59b6",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
   title: {
-    color: "#fff",
-    fontSize: 20, 
+    color: colors.textPrimary,
+    fontSize: 24,
     fontWeight: "bold",
-    letterSpacing: 1,
-    flex: 1,
-    textAlign: "center",
+    letterSpacing: 0.5,
   },
   logoutBtn: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    backgroundColor: "#fff",
-    borderRadius: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderRadius: 20,
   },
   logoutText: {
-    color: "#9b59b6",
-    fontWeight: "bold",
+    color: colors.textPrimary,
+    fontWeight: "600",
     fontSize: 14,
   },
 });

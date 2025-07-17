@@ -15,6 +15,8 @@ import {
 } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
+import { colors, shadows } from '@/theme/colors';
 
 const months = [
   "January",
@@ -139,155 +141,165 @@ export default function Income() {
         ]}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Year:</Text>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={year}
-              onValueChange={(itemValue) => setYear(itemValue)}
-              style={styles.picker}
-              itemStyle={styles.pickerItem}
-            >
-              <Picker.Item label="Select Year" value="" />
-              {years.map((y) => (
-                <Picker.Item key={y} label={y} value={y} />
-              ))}
-            </Picker>
-          </View>
-        </View>
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Month:</Text>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={month}
-              onValueChange={(itemValue) => setMonth(itemValue)}
-              style={styles.picker}
-              itemStyle={styles.pickerItem}
-            >
-              <Picker.Item label="Select Month" value="" />
-              {months.map((m) => (
-                <Picker.Item key={m} label={m} value={m.toLowerCase()} />
-              ))}
-            </Picker>
-          </View>
-        </View>
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Income:</Text>
-          <TextInput
-            style={styles.input}
-            value={income}
-            onChangeText={setIncome}
-            placeholder="Ex: 2500"
-            placeholderTextColor="#b0b0b0"
-            keyboardType="numeric"
-          />
-          <Text style={styles.label2}>Reason:</Text>
-          <TextInput
-            style={styles.input}
-            value={reason}
-            onChangeText={setReason}
-            placeholder="Salary"
-            placeholderTextColor="#b0b0b0"
-          />
-        </View>
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Add Income</Text>
-        </TouchableOpacity>
-
-        <Text style={styles.sectionTitle}>Past Income:</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={true}
-          contentContainerStyle={{ paddingBottom: 8 }}
-        >
-          <View
-            style={{ minWidth: screenWidth - 32, width: screenWidth * 1.2 }}
-          >
-            <View style={styles.tableHeader}>
-              <View style={{ flex: 0.7, alignItems: "flex-start" }}>
-                <Text style={styles.headerCell}>Year</Text>
-              </View>
-              <View style={{ flex: 0.8, alignItems: "flex-start" }}>
-                <Text style={styles.headerCell}>Month</Text>
-              </View>
-              <View style={{ flex: 1, alignItems: "flex-start" }}>
-                <Text style={styles.headerCell}>Income</Text>
-              </View>
-              <View style={{ flex: 1.5, alignItems: "flex-start" }}>
-                <Text style={styles.headerCell}>Reason</Text>
-              </View>
-              <View style={{ width: 40 }} />
+        <View style={styles.card}>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Year</Text>
+            <View style={styles.pickerWrapper}>
+              <Picker
+                selectedValue={year}
+                onValueChange={(itemValue) => setYear(itemValue)}
+                style={styles.picker}
+                itemStyle={styles.pickerItem}
+              >
+                <Picker.Item label="Select Year" value="" />
+                {years.map((y) => (
+                  <Picker.Item key={y} label={y} value={y} />
+                ))}
+              </Picker>
             </View>
-            <FlatList
-              data={incomeData}
-              keyExtractor={(item, index) =>
-                item.id?.toString() || index.toString()
-              }
-              scrollEnabled={false}
-              renderItem={({ item }) => (
-                <View style={styles.tableRow}>
-                  <View
-                    style={{
-                      flex: 0.7,
-                      justifyContent: "center",
-                      alignItems: "flex-start",
-                    }}
-                  >
-                    <Text style={styles.cell}>{item.year}</Text>
-                  </View>
-                  <View
-                    style={{
-                      flex: 0.8,
-                      justifyContent: "center",
-                      alignItems: "flex-start",
-                    }}
-                  >
-                    <Text style={styles.cell}>{item.month}</Text>
-                  </View>
-                  <View
-                    style={{
-                      flex: 1,
-                      justifyContent: "center",
-                      alignItems: "flex-start",
-                    }}
-                  >
-                    <Text style={styles.cellIncome}>{item.income}</Text>
-                  </View>
-                  <View
-                    style={{
-                      flex: 1.5,
-                      justifyContent: "center",
-                      alignItems: "flex-start",
-                    }}
-                  >
-                    <TouchableOpacity
-                      onPress={() => {
-                        if (item.reason && item.reason.length > 5) {
-                          setSelectedReason(item.reason);
-                          setModalVisible(true);
-                        }
-                      }}
-                      style={{ width: "100%" }}
-                    >
-                      <Text style={styles.cell}>
-                        {item.reason && item.reason.length > 5
-                          ? item.reason.substring(0, 5) + "..."
-                          : item.reason}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  <View style={{ width: 40, alignItems: "center" }}>
-                    <TouchableOpacity onPress={() => handleDelete(item.id)}>
-                      <Feather name="trash-2" size={20} color="#e74c3c" />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              )}
-              contentContainerStyle={{ paddingBottom: 16 }}
-              style={{ width: "100%" }}
+          </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Month</Text>
+            <View style={styles.pickerWrapper}>
+              <Picker
+                selectedValue={month}
+                onValueChange={(itemValue) => setMonth(itemValue)}
+                style={styles.picker}
+                itemStyle={styles.pickerItem}
+              >
+                <Picker.Item label="Select Month" value="" />
+                {months.map((m) => (
+                  <Picker.Item key={m} label={m} value={m.toLowerCase()} />
+                ))}
+              </Picker>
+            </View>
+          </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Income</Text>
+            <TextInput
+              style={styles.input}
+              value={income}
+              onChangeText={setIncome}
+              placeholder="Ex: 2500"
+              placeholderTextColor="#b0b0b0"
+              keyboardType="numeric"
+            />
+            <Text style={styles.label2}>Reason</Text>
+            <TextInput
+              style={styles.input}
+              value={reason}
+              onChangeText={setReason}
+              placeholder="Salary"
+              placeholderTextColor="#b0b0b0"
             />
           </View>
-        </ScrollView>
+          <LinearGradient
+            colors={[colors.headerGradient[0], colors.headerGradient[1]]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.button}
+          >
+            <TouchableOpacity style={{ width: "100%" }} onPress={handleSubmit}>
+              <Text style={styles.buttonText}>Add Income</Text>
+            </TouchableOpacity>
+          </LinearGradient>
+        </View>
+        <Text style={styles.sectionTitle}>Past Income</Text>
+        <View style={styles.tableCard}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={true}
+            contentContainerStyle={{ paddingBottom: 8 }}
+          >
+            <View
+              style={{ minWidth: screenWidth - 32, width: screenWidth * 1.2 }}
+            >
+              <View style={styles.tableHeader}>
+                <View style={{ flex: 0.7, alignItems: "flex-start" }}>
+                  <Text style={styles.headerCell}>Year</Text>
+                </View>
+                <View style={{ flex: 0.8, alignItems: "flex-start" }}>
+                  <Text style={styles.headerCell}>Month</Text>
+                </View>
+                <View style={{ flex: 1, alignItems: "flex-start" }}>
+                  <Text style={styles.headerCell}>Income</Text>
+                </View>
+                <View style={{ flex: 1.5, alignItems: "flex-start" }}>
+                  <Text style={styles.headerCell}>Reason</Text>
+                </View>
+                <View style={{ width: 40 }} />
+              </View>
+              <FlatList
+                data={incomeData}
+                keyExtractor={(item, index) =>
+                  item.id?.toString() || index.toString()
+                }
+                scrollEnabled={false}
+                renderItem={({ item }) => (
+                  <View style={styles.tableRow}>
+                    <View
+                      style={{
+                        flex: 0.7,
+                        justifyContent: "center",
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <Text style={styles.cell}>{item.year}</Text>
+                    </View>
+                    <View
+                      style={{
+                        flex: 0.8,
+                        justifyContent: "center",
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <Text style={styles.cell}>{item.month}</Text>
+                    </View>
+                    <View
+                      style={{
+                        flex: 1,
+                        justifyContent: "center",
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <Text style={styles.cellIncome}>{item.income}</Text>
+                    </View>
+                    <View
+                      style={{
+                        flex: 1.5,
+                        justifyContent: "center",
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <TouchableOpacity
+                        onPress={() => {
+                          if (item.reason && item.reason.length > 7) {
+                            setSelectedReason(item.reason);
+                            setModalVisible(true);
+                          }
+                        }}
+                        style={{ width: "100%" }}
+                      >
+                        <Text style={styles.cell}>
+                          {item.reason && item.reason.length > 7
+                            ? item.reason.substring(0, 7) + "..."
+                            : item.reason}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                    <View style={{ width: 40, alignItems: "center" }}>
+                      <TouchableOpacity onPress={() => handleDelete(item.id)}>
+                        <Feather name="trash-2" size={20} color="#e74c3c" />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+                contentContainerStyle={{ paddingBottom: 16 }}
+                style={{ width: "100%" }}
+              />
+            </View>
+          </ScrollView>
+        </View>
       </ScrollView>
 
       {/* Modal for displaying full reason */}
@@ -319,7 +331,7 @@ export default function Income() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 0 },
+  container: { flex: 1, backgroundColor: colors.background, padding: 0 },
   scrollContent: {
     flexGrow: 1,
     justifyContent: "flex-start",
@@ -327,63 +339,88 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 32,
   },
+  card: {
+    backgroundColor: colors.card,
+    borderRadius: 24,
+    padding: 24,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.medium,
+    width: "100%",
+  },
   label2: {
-    fontSize: 18,
-    fontWeight: "500",
+    fontSize: 16,
+    fontWeight: "600",
     marginBottom: 6,
     marginTop: 5,
+    color: colors.textPrimary,
   },
-  inputGroup: { marginBottom: 20, width: "100%" },
-  label: { fontSize: 18, fontWeight: "500", marginBottom: 6 },
+  inputGroup: { marginBottom: 18, width: "100%" },
+  label: { fontSize: 16, fontWeight: "600", marginBottom: 6, color: colors.textPrimary },
   input: {
-    backgroundColor: "#ededed",
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    backgroundColor: colors.inputBackground,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     fontSize: 16,
-    color: "#333",
-    width: "100%",
-    minWidth: 0,
+    color: colors.textPrimary,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   pickerWrapper: {
-    backgroundColor: "#ededed",
-    borderRadius: 8,
+    backgroundColor: colors.inputBackground,
+    borderRadius: 12,
     width: "100%",
     overflow: "hidden",
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   picker: {
     width: "100%",
-    color: "#333",
+    color: colors.textPrimary,
     backgroundColor: "transparent",
   },
   pickerItem: {
     fontSize: 16,
+    color: colors.textPrimary,
   },
   button: {
-    backgroundColor: "#9b59b6",
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: "center",
+    borderRadius: 12,
     marginTop: 16,
-    width: "100%",
+    marginBottom: 8,
+    overflow: 'hidden',
   },
   buttonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-    letterSpacing: 1,
-  },
-  sectionTitle: {
+    color: colors.buttonText,
     fontSize: 16,
     fontWeight: "bold",
-    marginTop: 32,
+    letterSpacing: 1,
+    paddingVertical: 14,
+    textAlign: "center",
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 12,
     marginBottom: 8,
     alignSelf: "flex-start",
+    color: colors.textPrimary,
+  },
+  tableCard: {
+    backgroundColor: colors.card,
+    borderRadius: 18,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.medium,
+    marginBottom: 24,
+    width: "100%",
   },
   tableHeader: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f3e5f5",
+    backgroundColor: colors.surfaceHighlight, // changed from "#f3e5f5"
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
     paddingVertical: 6,
@@ -394,21 +431,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "left",
     paddingLeft: 10,
+    color: colors.textPrimary, // ensure header text is visible
   },
   tableRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: colors.card, // changed from "#fff"
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderColor: "#eee",
+    borderColor: colors.surfaceHighlight, // changed from "#eee"
     minHeight: 36,
     width: '100%',
   },
   cell: {
     fontSize: 16,
     textAlign: "left",
-    color: "#333",
+    color: colors.textPrimary, // changed from "#333"
     paddingLeft: 10,
   },
   cellIncome: {

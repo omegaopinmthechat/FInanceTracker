@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { colors, shadows } from '@/theme/colors';
 
 const monthOrder = [
   "january",
@@ -157,25 +158,33 @@ const Home = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
-        contentContainerStyle={{ alignItems: "center", paddingBottom: 32 }}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Monthly Expense</Text>
+        <Text style={styles.title}>Monthly Overview</Text>
         <View style={styles.pickerContainer}>
-          <Text style={{ fontWeight: "bold", marginRight: 10 }}>
-            Select Year:
-          </Text>
-          <Picker
-            selectedValue={selectedYear}
-            style={{ height: 50, width: 160 }}
-            onValueChange={(itemValue) => setSelectedYear(itemValue)}
-          >
-            {availableYears.map((year) => (
-              <Picker.Item key={year} label={`${year}`} value={year} />
-            ))}
-          </Picker>
+          <Text style={styles.pickerLabel}>Year:</Text>
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={selectedYear}
+              style={styles.picker}
+              dropdownIconColor={colors.text}
+              onValueChange={(itemValue) => setSelectedYear(itemValue)}
+            >
+              {availableYears.map((year) => (
+                <Picker.Item 
+                  key={year} 
+                  label={`${year}`} 
+                  value={year}
+                  color="#000" // Set dropdown item text color to black
+                />
+              ))}
+            </Picker>
+          </View>
         </View>
-        <View style={[styles.chartBox, { width: chartBoxWidth }]}>
+
+        <View style={styles.chartCard}>
+          <Text style={styles.chartTitle}>Expenses</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <LineChart
               data={expenseChartData}
@@ -183,30 +192,31 @@ const Home = () => {
               height={220}
               yAxisLabel="₹"
               chartConfig={{
-                backgroundColor: "#800080",
-                backgroundGradientFrom: "#800080",
-                backgroundGradientTo: "#4B0082",
+                backgroundColor: colors.chartBackground,
+                backgroundGradientFrom: colors.chartBackground,
+                backgroundGradientTo: colors.chartBackground,
                 decimalPlaces: 0,
-                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                color: (opacity = 1) => `rgba(248, 113, 113, ${opacity})`,
                 labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                 style: { borderRadius: 16 },
                 propsForDots: {
-                  r: "3",
-                  strokeWidth: "1",
-                  stroke: "#ffa726",
+                  r: "6",
+                  strokeWidth: "2",
+                  stroke: colors.error
                 },
                 propsForBackgroundLines: {
-                  strokeWidth: 0.5,
+                  stroke: colors.chartGrid,
+                  strokeWidth: 1
                 },
               }}
-              bezier={false}
-              style={{ borderRadius: 16 }}
+              bezier
+              style={styles.chart}
             />
           </ScrollView>
         </View>
 
-        <Text style={styles.title}>Monthly Income</Text>
-        <View style={[styles.chartBox, { width: chartBoxWidth }]}>
+        <View style={styles.chartCard}>
+          <Text style={styles.chartTitle}>Income</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <LineChart
               data={incomeChartData}
@@ -214,21 +224,25 @@ const Home = () => {
               height={220}
               yAxisLabel="₹"
               chartConfig={{
-                backgroundColor: "#27ae60",
-                backgroundGradientFrom: "#27ae60",
-                backgroundGradientTo: "#145a32",
+                backgroundColor: colors.chartBackground,
+                backgroundGradientFrom: colors.chartBackground,
+                backgroundGradientTo: colors.chartBackground,
                 decimalPlaces: 0,
-                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                color: (opacity = 1) => `rgba(74, 222, 128, ${opacity})`,
                 labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                 style: { borderRadius: 16 },
                 propsForDots: {
                   r: "6",
                   strokeWidth: "2",
-                  stroke: "#ffa726",
+                  stroke: colors.success
+                },
+                propsForBackgroundLines: {
+                  stroke: colors.chartGrid,
+                  strokeWidth: 1
                 },
               }}
               bezier
-              style={{ borderRadius: 16 }}
+              style={styles.chart}
             />
           </ScrollView>
         </View>
@@ -238,19 +252,68 @@ const Home = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: "center", backgroundColor: "#fff" },
-  title: { fontSize: 24, fontWeight: "bold", marginVertical: 10 },
-  pickerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 10,
+  container: { 
+    flex: 1, 
+    backgroundColor: colors.background 
   },
-  chartBox: {
-    alignSelf: "center",
+  scrollContent: {
+    padding: 16,
+  },
+  title: { 
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: colors.textPrimary,
+    marginBottom: 20,
+  },
+  pickerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+    backgroundColor: colors.surface,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  pickerLabel: {
+    color: colors.textPrimary,
+    fontSize: 16,
+    fontWeight: '600',
+    marginRight: 12,
+  },
+  pickerWrapper: {
+    flex: 1,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    overflow: 'hidden',
+    backgroundColor: colors.inputBackground,
+  },
+  picker: {
+    color: colors.textPrimary,
+    backgroundColor: 'transparent',
+  },
+  pickerItem: {
+    fontSize: 16,
+    color: colors.textPrimary,
+  },
+  chartCard: {
+    backgroundColor: colors.card,
     borderRadius: 16,
-    overflow: "hidden",
-    backgroundColor: "#800080",
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.medium,
+  },
+  chartTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.textPrimary,
     marginBottom: 16,
+  },
+  chart: {
+    borderRadius: 16,
   },
 });
 

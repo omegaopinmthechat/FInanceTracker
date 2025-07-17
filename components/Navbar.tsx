@@ -1,6 +1,8 @@
 import { usePathname, Link } from "expo-router";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { FontAwesome5, MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { BlurView } from 'expo-blur';
+import { colors, shadows, spacing, radii } from '@/theme/colors';
 
 const tabs = [
   {
@@ -33,54 +35,87 @@ export default function Navbar() {
   const pathname = usePathname();
 
   return (
-    <View style={styles.navbar}>
-      {tabs.map((tab) => {
-        const isActive = pathname === tab.href;
-        return (
-          <Link href={tab.href} asChild key={tab.key}>
-            <TouchableOpacity style={styles.tab}>
-              {tab.icon}
-              <Text style={[styles.label, isActive && styles.activeLabel]}>
-                {tab.label}
-              </Text>
-              {isActive && <View style={styles.activeBar} />}
-            </TouchableOpacity>
-          </Link>
-        );
-      })}
-    </View>
+    <BlurView intensity={80} tint="dark" style={styles.blur}>
+      <View style={styles.navbar}>
+        {tabs.map((tab) => {
+          const isActive = pathname === tab.href;
+          return (
+            <Link href={tab.href} asChild key={tab.key}>
+              <TouchableOpacity 
+                style={styles.tab} // removed styles.activeTab
+                activeOpacity={0.7}
+              >
+                <View style={[styles.iconCircle, isActive && styles.activeIconCircle]}>
+                  {tab.icon}
+                </View>
+                <Text style={[styles.label, isActive && styles.activeLabel]}>
+                  {tab.label}
+                </Text>
+                {isActive && <View style={styles.activeIndicator} />}
+              </TouchableOpacity>
+            </Link>
+          );
+        })}
+      </View>
+    </BlurView>
   );
 }
 
 const styles = StyleSheet.create({
+  blur: {
+    position: 'absolute',
+    bottom: spacing.md,
+    left: spacing.md,
+    right: spacing.md,
+    borderRadius: radii.xl,
+    overflow: 'hidden',
+    ...shadows.medium, // fixed from shadows.md to shadows.medium
+  },
+  gradient: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    backgroundColor: colors.card, // changed from colors.navbarBackground to colors.card
+    borderTopWidth: 1,
+    borderColor: colors.border,
+  },
   navbar: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    height: 95,
-    backgroundColor: "#9b59b6",
-    width: "100%",
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    height: 65,
+    width: '100%',
   },
   tab: {
     flex: 1,
-    alignItems: "center",
-    paddingVertical: 6,
+    alignItems: 'center',
+    paddingVertical: 8,
+    // removed activeTab style, not needed
+  },
+  iconCircle: {
+    backgroundColor: 'rgba(124, 58, 237, 0.1)',
+    borderRadius: 12,
+    padding: 8,
+    marginBottom: 4,
+  },
+  activeIconCircle: {
+    backgroundColor: colors.primary,
   },
   label: {
-    color: "#fff",
-    fontSize: 14,
-    marginTop: 2,
-    fontWeight: "600",
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontWeight: '500',
   },
   activeLabel: {
-    fontWeight: "bold",
-    color: "#fff",
+    color: colors.primary,
+    fontWeight: '600',
   },
-  activeBar: {
-    marginTop: 2,
-    height: 4,
-    width: 36,
-    borderRadius: 2,
-    backgroundColor: "#fff",
+  activeIndicator: {
+    position: 'absolute',
+    bottom: -spacing.xs,
+    width: 16,
+    height: 2,
+    backgroundColor: colors.primary,
+    borderRadius: radii.full,
   },
 });
+

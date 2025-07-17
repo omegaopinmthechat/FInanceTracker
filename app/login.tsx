@@ -4,6 +4,8 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
+import { colors, shadows } from '@/theme/colors';
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -26,93 +28,130 @@ export default function Login() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Login</Text>
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Email:</Text>
-        <TextInput
-          style={styles.input}
-          value={email}
-          onChangeText={setEmail}
-          placeholder="Ex: user@email.com"
-          placeholderTextColor="#b0b0b0"
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-      </View>
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Password:</Text>
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
+      <View style={styles.card}>
+        <Text style={styles.title}>Welcome Back</Text>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Email</Text>
           <TextInput
-            style={[styles.input, { flex: 1, paddingRight: 40 }]}
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Password"
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            placeholder="user@email.com"
             placeholderTextColor="#b0b0b0"
-            secureTextEntry={!showPassword}
+            keyboardType="email-address"
+            autoCapitalize="none"
           />
-          <TouchableOpacity
-            style={styles.eyeIcon}
-            onPress={() => setShowPassword((prev) => !prev)}
-            activeOpacity={0.7}
-          >
-            <Feather
-              name={showPassword ? "eye" : "eye-off"}
-              size={22}
-              color="#9b59b6"
-            />
-          </TouchableOpacity>
         </View>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Password</Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <TextInput
+              style={[styles.input, { flex: 1, paddingRight: 40 }]}
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Password"
+              placeholderTextColor="#b0b0b0"
+              secureTextEntry={!showPassword}
+            />
+            <TouchableOpacity
+              style={styles.eyeIcon}
+              onPress={() => setShowPassword((prev) => !prev)}
+              activeOpacity={0.7}
+            >
+              <Feather
+                name={showPassword ? "eye" : "eye-off"}
+                size={22}
+                color="#a770ef"
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <LinearGradient
+          colors={[colors.buttonGradient[0], colors.buttonGradient[1]]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.button}
+        >
+          <TouchableOpacity style={{ width: "100%" }} onPress={handleLogin}>
+            <Text style={styles.buttonText}>Sign In</Text>
+          </TouchableOpacity>
+        </LinearGradient>
+        <TouchableOpacity onPress={() => router.push("/signup")}>
+          <Text style={styles.link}>Do not have an account? Sign Up</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("/reset-password")}>
+          <Text style={styles.link}>Forgot Password?</Text>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Sign In</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => router.push("/signup")}>
-        <Text style={styles.link}>Do not have an account? Sign Up</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => router.push("/reset-password")}>
-        <Text style={styles.link}>Forgot Password?</Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 24, justifyContent: "center" },
-  title: { fontSize: 28, fontWeight: "bold", color: "#9b59b6", marginBottom: 32, alignSelf: "center" },
-  inputGroup: { marginBottom: 20 },
-  label: { fontSize: 18, fontWeight: "500", marginBottom: 6 },
+  container: { 
+    flex: 1, 
+    backgroundColor: colors.background, 
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+  },
+  card: {
+    backgroundColor: colors.card,
+    borderRadius: 24,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.medium,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: colors.textPrimary,
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  inputGroup: { 
+    marginBottom: 20 
+  },
+  label: { 
+    fontSize: 16, 
+    fontWeight: '600', 
+    marginBottom: 8, 
+    color: colors.textPrimary,
+  },
   input: {
-    backgroundColor: "#ededed",
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    backgroundColor: colors.inputBackground,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     fontSize: 16,
-    color: "#333",
+    color: colors.textPrimary,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   button: {
-    backgroundColor: "#9b59b6",
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: "center",
+    borderRadius: 12,
     marginTop: 16,
+    marginBottom: 8,
+    overflow: 'hidden',
   },
   buttonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-    letterSpacing: 1,
+    color: colors.buttonText,
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+    paddingVertical: 14,
   },
   link: {
-    color: "#9b59b6",
-    marginTop: 16,
-    fontSize: 16,
-    textAlign: "center",
-    textDecorationLine: "underline",
+    color: colors.primaryLight,
+    marginTop: 12,
+    fontSize: 14,
+    textAlign: 'center',
+    fontWeight: '500',
   },
   eyeIcon: {
-    position: "absolute",
+    position: 'absolute',
     right: 12,
-    top: 10,
+    top: 12,
     padding: 4,
   },
 });

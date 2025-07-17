@@ -3,6 +3,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { View, StyleSheet } from "react-native";
 import Header from "../components/Header";
 import Navbar from "../components/Navbar";
+import { colors } from "@/theme/colors";
 
 export default function RootLayout() {
   const pathname = usePathname();
@@ -25,10 +26,13 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: colors.background,
+    paddingTop: 0,
   },
   content: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "transparent",
+    paddingHorizontal: 0,
+    paddingTop: 8,
   },
 });
