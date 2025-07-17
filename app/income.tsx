@@ -2,6 +2,7 @@ import { supabase } from "@/utils/supabase";
 import { Feather } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import React, { useEffect, useState } from "react";
+import { Modal } from "react-native";
 import {
   FlatList,
   StyleSheet,
@@ -11,7 +12,6 @@ import {
   View,
   ScrollView,
   Dimensions,
-  Platform,
 } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -36,6 +36,8 @@ const screenWidth = Dimensions.get("window").width;
 const contentMaxWidth = 420;
 
 export default function Income() {
+  const [selectedReason, setSelectedReason] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
   const now = new Date();
   const currentMonth = months[now.getMonth()].toLowerCase();
   const currentYear = now.getFullYear().toString();
@@ -45,13 +47,15 @@ export default function Income() {
   const [income, setIncome] = useState("");
   const [incomeData, setIncomeData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reason, setReason] = useState("");
 
   const handleSubmit = async () => {
-    if (!year || !month || !income) {
+    if (!year || !month || !income || !reason) {
       alert("Please fill in all fields.");
       return;
     }
 
+    //Adding income
     try {
       const {
         data: { user },
@@ -63,6 +67,7 @@ export default function Income() {
           month: month.trim().toLowerCase(),
           income: parseInt(income),
           user_id: user?.id, 
+          reason: reason
         },
       ]);
       fetchIncome();
@@ -72,12 +77,14 @@ export default function Income() {
       setYear(currentYear);
       setMonth(currentMonth);
       setIncome("");
+      setReason("")
     } catch (err) {
       alert("Failed to add income.");
       console.log("Supabase insert error", err);
     }
   };
 
+  //Fetching income
   const fetchIncome = async () => {
     const {
       data: { user },
@@ -174,41 +181,139 @@ export default function Income() {
             placeholderTextColor="#b0b0b0"
             keyboardType="numeric"
           />
+          <Text style={styles.label2}>Reason:</Text>
+          <TextInput
+            style={styles.input}
+            value={reason}
+            onChangeText={setReason}
+            placeholder="Salary"
+            placeholderTextColor="#b0b0b0"
+          />
         </View>
         <TouchableOpacity style={styles.button} onPress={handleSubmit}>
           <Text style={styles.buttonText}>Add Income</Text>
         </TouchableOpacity>
 
         <Text style={styles.sectionTitle}>Past Income:</Text>
-        <ScrollView horizontal>
-          <View style={{ minWidth: screenWidth - 32 }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={true}
+          contentContainerStyle={{ paddingBottom: 8 }}
+        >
+          <View
+            style={{ minWidth: screenWidth - 32, width: screenWidth * 1.2 }}
+          >
             <View style={styles.tableHeader}>
-              <Text style={styles.headerCell}>Year</Text>
-              <Text style={styles.headerCell}>Month</Text>
-              <Text style={styles.headerCell}>Income</Text>
+              <View style={{ flex: 0.7, alignItems: "flex-start" }}>
+                <Text style={styles.headerCell}>Year</Text>
+              </View>
+              <View style={{ flex: 0.8, alignItems: "flex-start" }}>
+                <Text style={styles.headerCell}>Month</Text>
+              </View>
+              <View style={{ flex: 1, alignItems: "flex-start" }}>
+                <Text style={styles.headerCell}>Income</Text>
+              </View>
+              <View style={{ flex: 1.5, alignItems: "flex-start" }}>
+                <Text style={styles.headerCell}>Reason</Text>
+              </View>
+              <View style={{ width: 40 }} />
             </View>
             <FlatList
               data={incomeData}
-              keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+              keyExtractor={(item, index) =>
+                item.id?.toString() || index.toString()
+              }
+              scrollEnabled={false}
               renderItem={({ item }) => (
                 <View style={styles.tableRow}>
-                  <Text style={styles.cell}>{item.year}</Text>
-                  <Text style={styles.cell}>{item.month}</Text>
-                  <Text style={styles.cellIncome}>{item.income}</Text>
-                  <TouchableOpacity
-                    onPress={() => handleDelete(item.id)}
-                    style={{ padding: 4, marginLeft: 8 }}
+                  <View
+                    style={{
+                      flex: 0.7,
+                      justifyContent: "center",
+                      alignItems: "flex-start",
+                    }}
                   >
-                    <Feather name="trash-2" size={20} color="#e74c3c" />
-                  </TouchableOpacity>
+                    <Text style={styles.cell}>{item.year}</Text>
+                  </View>
+                  <View
+                    style={{
+                      flex: 0.8,
+                      justifyContent: "center",
+                      alignItems: "flex-start",
+                    }}
+                  >
+                    <Text style={styles.cell}>{item.month}</Text>
+                  </View>
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: "center",
+                      alignItems: "flex-start",
+                    }}
+                  >
+                    <Text style={styles.cellIncome}>{item.income}</Text>
+                  </View>
+                  <View
+                    style={{
+                      flex: 1.5,
+                      justifyContent: "center",
+                      alignItems: "flex-start",
+                    }}
+                  >
+                    <TouchableOpacity
+                      onPress={() => {
+                        if (item.reason && item.reason.length > 5) {
+                          setSelectedReason(item.reason);
+                          setModalVisible(true);
+                        }
+                      }}
+                      style={{ width: "100%" }}
+                    >
+                      <Text style={styles.cell}>
+                        {item.reason && item.reason.length > 5
+                          ? item.reason.substring(0, 5) + "..."
+                          : item.reason}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View style={{ width: 40, alignItems: "center" }}>
+                    <TouchableOpacity onPress={() => handleDelete(item.id)}>
+                      <Feather name="trash-2" size={20} color="#e74c3c" />
+                    </TouchableOpacity>
+                  </View>
                 </View>
               )}
               contentContainerStyle={{ paddingBottom: 16 }}
-              style={{ minWidth: screenWidth - 32 }}
+              style={{ width: "100%" }}
             />
           </View>
         </ScrollView>
       </ScrollView>
+
+      {/* Modal for displaying full reason */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setModalVisible(false)}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Reason</Text>
+            <Text style={styles.modalText}>{selectedReason}</Text>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -221,6 +326,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 16,
     paddingBottom: 32,
+  },
+  label2: {
+    fontSize: 18,
+    fontWeight: "500",
+    marginBottom: 6,
+    marginTop: 5,
   },
   inputGroup: { marginBottom: 20, width: "100%" },
   label: { fontSize: 18, fontWeight: "500", marginBottom: 6 },
@@ -276,13 +387,13 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
     paddingVertical: 6,
+    width: '100%',
   },
   headerCell: {
-    flex: 1,
-    minWidth: 70,
     fontWeight: "bold",
     fontSize: 16,
-    textAlign: "center",
+    textAlign: "left",
+    paddingLeft: 10,
   },
   tableRow: {
     flexDirection: "row",
@@ -292,20 +403,54 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: "#eee",
     minHeight: 36,
+    width: '100%',
   },
   cell: {
-    flex: 1,
-    minWidth: 70,
     fontSize: 16,
-    textAlign: "center",
+    textAlign: "left",
     color: "#333",
+    paddingLeft: 10,
   },
   cellIncome: {
-    flex: 1,
-    minWidth: 70,
     fontSize: 16,
-    textAlign: "center",
+    textAlign: "left",
     color: "#8ec322",
     fontWeight: "bold",
+    paddingLeft: 10,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    width: '100%',
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+  },
+  modalText: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 20,
+  },
+  closeButton: {
+    backgroundColor: '#9b59b6',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
