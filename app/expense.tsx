@@ -2,8 +2,8 @@ import { supabase } from "@/utils/supabase";
 import { Feather } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import React, { useEffect, useState } from "react";
-import { Modal } from "react-native";
 import {
+  Modal,
   Dimensions,
   FlatList,
   ScrollView,
