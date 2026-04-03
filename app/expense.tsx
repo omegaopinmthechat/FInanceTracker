@@ -1,11 +1,13 @@
+import { colors, shadows } from '@/theme/colors';
 import { supabase } from "@/utils/supabase";
 import { Feather } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
-import React, { useEffect, useState } from "react";
+import { LinearGradient } from "expo-linear-gradient";
+import { useEffect, useState } from "react";
 import {
-  Modal,
   Dimensions,
   FlatList,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -15,8 +17,6 @@ import {
 } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import { colors, shadows } from '@/theme/colors';
 
 const months = [
   "January",
@@ -43,6 +43,7 @@ export default function Expense() {
   const now = new Date();
   const currentMonth = months[now.getMonth()].toLowerCase();
   const currentYear = now.getFullYear().toString();
+  const currentDate = now.getDate();
 
   const [year, setYear] = useState(currentYear);
   const [month, setMonth] = useState(currentMonth);
@@ -50,10 +51,18 @@ export default function Expense() {
   const [expenseData, setExpenseData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [reason, setReason] = useState("");
+  // keep date as a string so clearing the TextInput shows blank instead of NaN
+  const [date, setDate] = useState<string>(currentDate.toString());
 
   const handleSubmit = async () => {
-    if (!year || !month || !expense || !reason) {
+    if (!year || !month || !expense || !reason || date === "") {
       alert("Please fill in all fields.");
+      return;
+    }
+
+    const parsedDate = parseInt(date, 10);
+    if (isNaN(parsedDate) || parsedDate < 1 || parsedDate > 31) {
+      alert("Please enter a valid date between 1 and 31.");
       return;
     }
 
@@ -61,29 +70,43 @@ export default function Expense() {
     try {
       const {
         data: { user },
-        error,
+        error: getUserError,
       } = await supabase.auth.getUser();
-      await supabase.from("Expense").insert([
-        {
-          year: parseInt(year),
-          month: month.trim().toLowerCase(),
-          expense: parseInt(expense),
-          user_id: user?.id,
-          reason: reason
-        },
-      ]);
-      fetchExpense();
 
-      if (error) throw error;
+      if (getUserError) {
+        console.error("Error getting user:", getUserError);
+        throw getUserError;
+      }
 
-      console.log("Success");
+      const { data: insertData, error: insertError } = await supabase
+        .from("Expense")
+        .insert([
+          {
+            year: parseInt(year),
+            month: month.trim().toLowerCase(),
+            expense: parseInt(expense),
+            user_id: user?.id,
+            reason: reason,
+            date: parsedDate,
+          },
+        ])
+        .select();
+
+      if (insertError) {
+        console.error("Insert error:", insertError);
+        throw insertError;
+      }
+
+      console.log("Insert success:", insertData);
+      await fetchExpense();
 
       setYear(currentYear);
       setMonth(currentMonth);
+      setDate(currentDate.toString());
       setExpense("");
       setReason("");
     } catch (error) {
-      alert("Failed to add expense.");
+      alert("Failed to add expense. See console for details.");
       console.log("Supabase insert error", error);
     }
   };
@@ -171,6 +194,15 @@ export default function Expense() {
                 ))}
               </Picker>
             </View>
+            <Text style={styles.label2}>Date</Text>
+            <TextInput
+              style={styles.input}
+              value={date}
+              onChangeText={(text) => setDate(text)}
+              placeholder="Ex: 21"
+              placeholderTextColor="#b0b0b0"
+              keyboardType="numeric"
+            />
           </View>
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Expense</Text>
@@ -214,10 +246,13 @@ export default function Expense() {
             >
               <View style={styles.tableHeader}>
                 <View style={{ flex: 0.7, alignItems: "flex-start" }}>
-                  <Text style={styles.headerCell}>Year</Text>
+                  <Text style={styles.headerCell}>Date</Text>
                 </View>
                 <View style={{ flex: 0.8, alignItems: "flex-start" }}>
                   <Text style={styles.headerCell}>Month</Text>
+                </View>
+                <View style={{ flex: 0.7, alignItems: "flex-start" }}>
+                  <Text style={styles.headerCell}>Year</Text>
                 </View>
                 <View style={{ flex: 1, alignItems: "flex-start" }}>
                   <Text style={styles.headerCell}>Expense</Text>
@@ -242,7 +277,7 @@ export default function Expense() {
                         alignItems: "flex-start",
                       }}
                     >
-                      <Text style={styles.cell}>{item.year}</Text>
+                      <Text style={styles.cell}>{item.date}</Text>
                     </View>
                     <View
                       style={{
@@ -253,6 +288,16 @@ export default function Expense() {
                     >
                       <Text style={styles.cell}>{item.month}</Text>
                     </View>
+                    <View
+                      style={{
+                        flex: 0.7,
+                        justifyContent: "center",
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <Text style={styles.cell}>{item.year}</Text>
+                    </View>
+
                     <View
                       style={{
                         flex: 1,

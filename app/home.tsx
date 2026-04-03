@@ -172,17 +172,109 @@ const Home = () => {
               onValueChange={(itemValue) => setSelectedYear(itemValue)}
             >
               {availableYears.map((year) => (
-                <Picker.Item 
-                  key={year} 
-                  label={`${year}`} 
+                <Picker.Item
+                  key={year}
+                  label={`${year}`}
                   value={year}
-                  color="#000" 
+                  color="#000"
                 />
               ))}
             </Picker>
           </View>
         </View>
 
+        <View style={styles.visualSection}>
+          <Text style={styles.visualTitle}>Summary</Text>
+          <View style={styles.summaryRow}>
+            <View style={[styles.summaryCard, { borderColor: colors.error }]}>
+              <Text style={styles.summaryLabel}>Total Expense</Text>
+              <Text style={[styles.summaryValue, { color: colors.error }]}>
+                ₹
+                {expenseData
+                  .filter((e) => e.year === selectedYear)
+                  .reduce((sum, e) => sum + Number(e.expense), 0)}
+              </Text>
+            </View>
+            <View style={[styles.summaryCard, { borderColor: colors.success }]}>
+              <Text style={styles.summaryLabel}>Total Income</Text>
+              <Text style={[styles.summaryValue, { color: colors.success }]}>
+                ₹
+                {incomeData
+                  .filter((i) => i.year === selectedYear)
+                  .reduce((sum, i) => sum + Number(i.income), 0)}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.balanceCard}>
+            <Text style={styles.summaryLabel}>Net Balance</Text>
+            <Text
+              style={[
+                styles.summaryValue,
+                {
+                  color:
+                    incomeData
+                      .filter((i) => i.year === selectedYear)
+                      .reduce((sum, i) => sum + Number(i.income), 0) -
+                      expenseData
+                        .filter((e) => e.year === selectedYear)
+                        .reduce((sum, e) => sum + Number(e.expense), 0) >=
+                    0
+                      ? colors.success
+                      : colors.error,
+                },
+              ]}
+            >
+              ₹
+              {incomeData
+                .filter((i) => i.year === selectedYear)
+                .reduce((sum, i) => sum + Number(i.income), 0) -
+                expenseData
+                  .filter((e) => e.year === selectedYear)
+                  .reduce((sum, e) => sum + Number(e.expense), 0)}
+            </Text>
+          </View>
+
+          {/* --- Pie Chart Visualization --- */}
+          <View style={styles.pieChartContainer}>
+            <Text style={styles.visualTitle}>Income vs Expense</Text>
+            <PieChart
+              data={[
+                {
+                  name: "Expense",
+                  amount: expenseData
+                    .filter((e) => e.year === selectedYear)
+                    .reduce((sum, e) => sum + Number(e.expense), 0),
+                  color: colors.error,
+                  legendFontColor: colors.textPrimary,
+                  legendFontSize: 14,
+                },
+                {
+                  name: "Income",
+                  amount: incomeData
+                    .filter((i) => i.year === selectedYear)
+                    .reduce((sum, i) => sum + Number(i.income), 0),
+                  color: colors.success,
+                  legendFontColor: colors.textPrimary,
+                  legendFontSize: 14,
+                },
+              ]}
+              width={Dimensions.get("window").width - 48}
+              height={180}
+              chartConfig={{
+                color: () => colors.textPrimary,
+                labelColor: () => colors.textPrimary,
+                backgroundColor: colors.card,
+                backgroundGradientFrom: colors.card,
+                backgroundGradientTo: colors.card,
+              }}
+              accessor="amount"
+              backgroundColor="transparent"
+              paddingLeft="10"
+              absolute
+              hasLegend={true}
+            />
+          </View>
+        </View>
         <View style={styles.chartCard}>
           <Text style={styles.chartTitle}>Expenses</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -202,11 +294,11 @@ const Home = () => {
                 propsForDots: {
                   r: "6",
                   strokeWidth: "2",
-                  stroke: colors.error
+                  stroke: colors.error,
                 },
                 propsForBackgroundLines: {
                   stroke: colors.chartGrid,
-                  strokeWidth: 1
+                  strokeWidth: 1,
                 },
               }}
               bezier
@@ -234,11 +326,11 @@ const Home = () => {
                 propsForDots: {
                   r: "6",
                   strokeWidth: "2",
-                  stroke: colors.success
+                  stroke: colors.success,
                 },
                 propsForBackgroundLines: {
                   stroke: colors.chartGrid,
-                  strokeWidth: 1
+                  strokeWidth: 1,
                 },
               }}
               bezier
@@ -248,79 +340,6 @@ const Home = () => {
         </View>
 
         {/* --- New Visualizations Section --- */}
-        <View style={styles.visualSection}>
-          <Text style={styles.visualTitle}>Summary</Text>
-          <View style={styles.summaryRow}>
-            <View style={[styles.summaryCard, { borderColor: colors.error }]}>
-              <Text style={styles.summaryLabel}>Total Expense</Text>
-              <Text style={[styles.summaryValue, { color: colors.error }]}>
-                ₹{expenseData.filter(e => e.year === selectedYear).reduce((sum, e) => sum + Number(e.expense), 0)}
-              </Text>
-            </View>
-            <View style={[styles.summaryCard, { borderColor: colors.success }]}>
-              <Text style={styles.summaryLabel}>Total Income</Text>
-              <Text style={[styles.summaryValue, { color: colors.success }]}>
-                ₹{incomeData.filter(i => i.year === selectedYear).reduce((sum, i) => sum + Number(i.income), 0)}
-              </Text>
-            </View>
-          </View>
-          <View style={styles.balanceCard}>
-            <Text style={styles.summaryLabel}>Net Balance</Text>
-            <Text
-              style={[
-                styles.summaryValue,
-                {
-                  color:
-                    (incomeData.filter(i => i.year === selectedYear).reduce((sum, i) => sum + Number(i.income), 0) -
-                      expenseData.filter(e => e.year === selectedYear).reduce((sum, e) => sum + Number(e.expense), 0)) >= 0
-                      ? colors.success
-                      : colors.error,
-                },
-              ]}
-            >
-              ₹
-              {incomeData.filter(i => i.year === selectedYear).reduce((sum, i) => sum + Number(i.income), 0) -
-                expenseData.filter(e => e.year === selectedYear).reduce((sum, e) => sum + Number(e.expense), 0)}
-            </Text>
-          </View>
-
-          {/* --- Pie Chart Visualization --- */}
-          <View style={styles.pieChartContainer}>
-            <Text style={styles.visualTitle}>Income vs Expense</Text>
-            <PieChart
-              data={[
-                {
-                  name: "Expense",
-                  amount: expenseData.filter(e => e.year === selectedYear).reduce((sum, e) => sum + Number(e.expense), 0),
-                  color: colors.error,
-                  legendFontColor: colors.textPrimary,
-                  legendFontSize: 14,
-                },
-                {
-                  name: "Income",
-                  amount: incomeData.filter(i => i.year === selectedYear).reduce((sum, i) => sum + Number(i.income), 0),
-                  color: colors.success,
-                  legendFontColor: colors.textPrimary,
-                  legendFontSize: 14,
-                },
-              ]}
-              width={Dimensions.get("window").width - 48}
-              height={180}
-              chartConfig={{
-                color: () => colors.textPrimary,
-                labelColor: () => colors.textPrimary,
-                backgroundColor: colors.card,
-                backgroundGradientFrom: colors.card,
-                backgroundGradientTo: colors.card,
-              }}
-              accessor="amount"
-              backgroundColor="transparent"
-              paddingLeft="10"
-              absolute
-              hasLegend={true}
-            />
-          </View>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );

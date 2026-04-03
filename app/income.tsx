@@ -43,6 +43,7 @@ export default function Income() {
   const now = new Date();
   const currentMonth = months[now.getMonth()].toLowerCase();
   const currentYear = now.getFullYear().toString();
+  const currentDate = now.getDate();
 
   const [year, setYear] = useState(currentYear);
   const [month, setMonth] = useState(currentMonth);
@@ -50,10 +51,18 @@ export default function Income() {
   const [incomeData, setIncomeData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [reason, setReason] = useState("");
+  // keep date as a string so input can be cleared
+  const [date, setDate] = useState<string>(currentDate.toString());
 
   const handleSubmit = async () => {
-    if (!year || !month || !income || !reason) {
+    if (!year || !month || !income || !reason || date === "") {
       alert("Please fill in all fields.");
+      return;
+    }
+
+    const parsedDate = parseInt(date, 10);
+    if (isNaN(parsedDate) || parsedDate < 1 || parsedDate > 31) {
+      alert("Please enter a valid date between 1 and 31.");
       return;
     }
 
@@ -61,27 +70,43 @@ export default function Income() {
     try {
       const {
         data: { user },
-        error
+        error: getUserError,
       } = await supabase.auth.getUser();
-      await supabase.from("Income").insert([
-        {
-          year: parseInt(year),
-          month: month.trim().toLowerCase(),
-          income: parseInt(income),
-          user_id: user?.id, 
-          reason: reason
-        },
-      ]);
-      fetchIncome();
 
-      if (error) throw error;
+      if (getUserError) {
+        console.error("Error getting user:", getUserError);
+        throw getUserError;
+      }
+
+      const { data: insertData, error: insertError } = await supabase
+        .from("Income")
+        .insert([
+          {
+            year: parseInt(year),
+            month: month.trim().toLowerCase(),
+            income: parseInt(income),
+            user_id: user?.id,
+            reason: reason,
+            date: parsedDate,
+          },
+        ])
+        .select();
+
+      if (insertError) {
+        console.error("Insert error:", insertError);
+        throw insertError;
+      }
+
+      console.log("Insert success:", insertData);
+      await fetchIncome();
 
       setYear(currentYear);
       setMonth(currentMonth);
+      setDate(currentDate.toString());
       setIncome("");
-      setReason("")
+      setReason("");
     } catch (err) {
-      alert("Failed to add income.");
+      alert("Failed to add income. See console for details.");
       console.log("Supabase insert error", err);
     }
   };
@@ -173,6 +198,15 @@ export default function Income() {
                 ))}
               </Picker>
             </View>
+              <Text style={styles.label2}>Date</Text>
+              <TextInput
+                style={styles.input}
+                value={date}
+                onChangeText={(text) => setDate(text)}
+                placeholder="Ex: 21"
+                placeholderTextColor="#b0b0b0"
+                keyboardType="numeric"
+              />
           </View>
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Income</Text>
@@ -215,12 +249,15 @@ export default function Income() {
               style={{ minWidth: screenWidth - 32, width: screenWidth * 1.2 }}
             >
               <View style={styles.tableHeader}>
-                <View style={{ flex: 0.7, alignItems: "flex-start" }}>
-                  <Text style={styles.headerCell}>Year</Text>
-                </View>
-                <View style={{ flex: 0.8, alignItems: "flex-start" }}>
-                  <Text style={styles.headerCell}>Month</Text>
-                </View>
+                  <View style={{ flex: 0.7, alignItems: "flex-start" }}>
+                    <Text style={styles.headerCell}>Date</Text>
+                  </View>
+                  <View style={{ flex: 0.8, alignItems: "flex-start" }}>
+                    <Text style={styles.headerCell}>Month</Text>
+                  </View>
+                  <View style={{ flex: 0.7, alignItems: "flex-start" }}>
+                    <Text style={styles.headerCell}>Year</Text>
+                  </View>
                 <View style={{ flex: 1, alignItems: "flex-start" }}>
                   <Text style={styles.headerCell}>Income</Text>
                 </View>
@@ -244,7 +281,7 @@ export default function Income() {
                         alignItems: "flex-start",
                       }}
                     >
-                      <Text style={styles.cell}>{item.year}</Text>
+                      <Text style={styles.cell}>{item.date}</Text>
                     </View>
                     <View
                       style={{
@@ -254,6 +291,15 @@ export default function Income() {
                       }}
                     >
                       <Text style={styles.cell}>{item.month}</Text>
+                    </View>
+                    <View
+                      style={{
+                        flex: 0.7,
+                        justifyContent: "center",
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <Text style={styles.cell}>{item.year}</Text>
                     </View>
                     <View
                       style={{
