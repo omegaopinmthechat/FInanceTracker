@@ -1,8 +1,7 @@
 import { supabase } from "@/utils/supabase";
 import { Picker } from "@react-native-picker/picker";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Dimensions,
   ScrollView,
   StyleSheet,
@@ -11,7 +10,8 @@ import {
 } from "react-native";
 import { LineChart, PieChart } from "react-native-chart-kit";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { colors, shadows } from '@/theme/colors';
+import { colors, fonts } from '@/theme/colors';
+import { DashboardSkeleton } from "@/components/LoadingSkeleton";
 
 const monthOrder = [
   "january",
@@ -57,7 +57,7 @@ const Home = () => {
   const [selectedYear, setSelectedYear] = useState<number | null>(currentYear);
   const [availableYears, setAvailableYears] = useState<number[]>([]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const {
         data: { user },
@@ -85,9 +85,12 @@ const Home = () => {
       ).sort();
 
       setAvailableYears(years);
-      if (!selectedYear || !years.includes(selectedYear)) {
-        setSelectedYear(years.includes(currentYear) ? currentYear : years[0] ?? null);
-      }
+      setSelectedYear((prev) => {
+        if (!prev || !years.includes(prev)) {
+          return years.includes(currentYear) ? currentYear : years[0] ?? null;
+        }
+        return prev;
+      });
       setLoading(false);
     } catch (err) {
       console.error("Fetch error:", err);
@@ -97,9 +100,9 @@ const Home = () => {
       setIncomeChartData({ labels: [], datasets: [{ data: [] }] });
       setLoading(false);
     }
-  };
+  }, [currentYear]);
 
-  const updateChartData = () => {
+  const updateChartData = useCallback(() => {
     if (!selectedYear) return;
 
     // Expense: always show all months, fill missing with 0
@@ -129,25 +132,25 @@ const Home = () => {
       labels: incomeLabels,
       datasets: [{ data: incomeValues }],
     });
-  };
+  }, [expenseData, incomeData, selectedYear]);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   useEffect(() => {
     updateChartData();
-  }, [selectedYear, expenseData, incomeData]);
+  }, [updateChartData]);
 
   if (loading) {
     return (
-      <SafeAreaView
-        style={[
-          styles.container,
-          { justifyContent: "center", alignItems: "center" },
-        ]}
-      >
-        <ActivityIndicator size="large" color="#9b59b6" />
+      <SafeAreaView style={styles.container}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <DashboardSkeleton />
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -162,6 +165,7 @@ const Home = () => {
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.title}>Monthly Overview</Text>
+        <Text style={styles.subtitle}>A concise view of cash in, cash out, and balance health.</Text>
         <View style={styles.pickerContainer}>
           <Text style={styles.pickerLabel}>Year:</Text>
           <View style={styles.pickerWrapper}>
@@ -176,7 +180,7 @@ const Home = () => {
                   key={year}
                   label={`${year}`}
                   value={year}
-                  color="#000"
+                  color={colors.textPrimary}
                 />
               ))}
             </Picker>
@@ -186,7 +190,7 @@ const Home = () => {
         <View style={styles.visualSection}>
           <Text style={styles.visualTitle}>Summary</Text>
           <View style={styles.summaryRow}>
-            <View style={[styles.summaryCard, { borderColor: colors.error }]}>
+            <View style={styles.summaryCard}>
               <Text style={styles.summaryLabel}>Total Expense</Text>
               <Text style={[styles.summaryValue, { color: colors.error }]}>
                 ₹
@@ -195,7 +199,7 @@ const Home = () => {
                   .reduce((sum, e) => sum + Number(e.expense), 0)}
               </Text>
             </View>
-            <View style={[styles.summaryCard, { borderColor: colors.success }]}>
+            <View style={styles.summaryCard}>
               <Text style={styles.summaryLabel}>Total Income</Text>
               <Text style={[styles.summaryValue, { color: colors.success }]}>
                 ₹
@@ -263,9 +267,9 @@ const Home = () => {
               chartConfig={{
                 color: () => colors.textPrimary,
                 labelColor: () => colors.textPrimary,
-                backgroundColor: colors.card,
-                backgroundGradientFrom: colors.card,
-                backgroundGradientTo: colors.card,
+                backgroundColor: colors.surface,
+                backgroundGradientFrom: colors.surface,
+                backgroundGradientTo: colors.surface,
               }}
               accessor="amount"
               backgroundColor="transparent"
@@ -288,8 +292,8 @@ const Home = () => {
                 backgroundGradientFrom: colors.chartBackground,
                 backgroundGradientTo: colors.chartBackground,
                 decimalPlaces: 0,
-                color: (opacity = 1) => `rgba(248, 113, 113, ${opacity})`,
-                labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                color: (opacity = 1) => `rgba(239, 68, 68, ${opacity})`,
+                labelColor: (opacity = 1) => `rgba(17, 17, 17, ${opacity})`,
                 style: { borderRadius: 16 },
                 propsForDots: {
                   r: "6",
@@ -320,8 +324,8 @@ const Home = () => {
                 backgroundGradientFrom: colors.chartBackground,
                 backgroundGradientTo: colors.chartBackground,
                 decimalPlaces: 0,
-                color: (opacity = 1) => `rgba(74, 222, 128, ${opacity})`,
-                labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                color: (opacity = 1) => `rgba(22, 163, 74, ${opacity})`,
+                labelColor: (opacity = 1) => `rgba(17, 17, 17, ${opacity})`,
                 style: { borderRadius: 16 },
                 propsForDots: {
                   r: "6",
@@ -352,32 +356,40 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
+    paddingBottom: 110,
   },
   title: { 
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 30,
+    fontWeight: '700',
     color: colors.textPrimary,
+    marginBottom: 4,
+    letterSpacing: 0.2,
+    fontFamily: fonts.display,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: colors.textSecondary,
     marginBottom: 20,
+    fontFamily: fonts.body,
   },
   pickerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 24,
-    backgroundColor: colors.surface,
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
+    paddingVertical: 4,
   },
   pickerLabel: {
     color: colors.textPrimary,
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     marginRight: 12,
+    letterSpacing: 0.7,
+    textTransform: 'uppercase',
+    fontFamily: fonts.heading,
   },
   pickerWrapper: {
     flex: 1,
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.border,
     overflow: 'hidden',
@@ -392,39 +404,37 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   chartCard: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 24,
-    borderWidth: 1,
+    paddingTop: 14,
+    borderTopWidth: 1,
     borderColor: colors.border,
-    ...shadows.medium,
+    marginBottom: 24,
   },
   chartTitle: {
-    fontSize: 18,
+    fontSize: 13,
     fontWeight: '600',
-    color: colors.textPrimary,
+    color: colors.textSecondary,
     marginBottom: 16,
+    letterSpacing: 0.9,
+    textTransform: 'uppercase',
+    fontFamily: fonts.heading,
   },
   chart: {
     borderRadius: 16,
   },
   visualSection: {
-    marginTop: 8,
-    marginBottom: 32,
-    padding: 16,
-    backgroundColor: colors.surface,
-    borderRadius: 16,
-    borderWidth: 1,
+    marginTop: 4,
+    marginBottom: 22,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
     borderColor: colors.border,
-    ...shadows.medium,
   },
   visualTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 16,
+    fontWeight: "700",
     color: colors.textPrimary,
-    marginBottom: 14,
-    letterSpacing: 0.5,
+    marginBottom: 12,
+    letterSpacing: 0.3,
+    fontFamily: fonts.heading,
   },
   summaryRow: {
     flexDirection: "row",
@@ -434,10 +444,7 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     flex: 1,
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    padding: 14,
+    paddingVertical: 10,
     alignItems: "center",
     marginHorizontal: 2,
   },
@@ -446,30 +453,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 4,
     fontWeight: "600",
+    fontFamily: fonts.heading,
   },
   summaryValue: {
     fontSize: 20,
     fontWeight: "bold",
     letterSpacing: 0.5,
+    fontFamily: fonts.display,
   },
   balanceCard: {
     marginTop: 4,
-    backgroundColor: colors.surfaceHighlight,
-    borderRadius: 12,
-    padding: 16,
+    paddingVertical: 12,
     alignItems: "center",
-    borderWidth: 1.5,
-    borderColor: colors.primary,
+    borderTopWidth: 1,
+    borderColor: colors.border,
   },
   pieChartContainer: {
-    marginTop: 18,
+    marginTop: 10,
     alignItems: "center",
-    backgroundColor: colors.surface,
-    borderRadius: 16,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    ...shadows.medium,
+    paddingVertical: 8,
   },
 });
 

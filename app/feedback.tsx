@@ -6,30 +6,26 @@ import {
   TouchableOpacity,
   View,
   ScrollView,
-  Dimensions,
-  Platform,
-  StatusBar,
-  Alert,
   Modal,
   Animated,
 } from "react-native";
 import React, { useState, useRef } from "react";
 import { supabase } from "@/utils/supabase";
-import { LinearGradient } from "expo-linear-gradient";
-import { colors, shadows } from '@/theme/colors';
-
-const { width } = Dimensions.get("window");
+import { colors, fonts } from '@/theme/colors';
 
 export default function Feedback() {
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const handleSubmit = async () => {
+    setErrorMessage("");
+
     if (!email || !subject || !message) {
-      Alert.alert("Please fill in all fields.");
+      setErrorMessage("Please fill in all fields.");
       return;
     }
     try {
@@ -44,6 +40,7 @@ export default function Feedback() {
       setEmail("");
       setSubject("");
       setMessage("");
+      setErrorMessage("");
       setShowSuccess(true);
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -59,7 +56,7 @@ export default function Feedback() {
         }, 1800);
       });
     } catch (error) {
-      Alert.alert("Failed to add your feedback. Please try after sometime.");
+      setErrorMessage("Failed to add your feedback. Please try after sometime.");
     }
   };
 
@@ -71,14 +68,19 @@ export default function Feedback() {
       >
         <View style={styles.card}>
           <Text style={styles.title}>Send Feedback</Text>
+          <Text style={styles.subtitle}>Tell us what works and what we can improve.</Text>
+          {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Email</Text>
             <TextInput
               style={styles.input}
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(value) => {
+                setEmail(value);
+                if (errorMessage) setErrorMessage("");
+              }}
               placeholder="user@email.com"
-              placeholderTextColor="#b0b0b0"
+              placeholderTextColor={colors.textMuted}
               keyboardType="email-address"
               autoCapitalize="none"
             />
@@ -88,9 +90,12 @@ export default function Feedback() {
             <TextInput
               style={styles.input}
               value={subject}
-              onChangeText={setSubject}
+              onChangeText={(value) => {
+                setSubject(value);
+                if (errorMessage) setErrorMessage("");
+              }}
               placeholder="App Feedback"
-              placeholderTextColor="#b0b0b0"
+              placeholderTextColor={colors.textMuted}
             />
           </View>
           <View style={styles.inputGroup}>
@@ -98,23 +103,19 @@ export default function Feedback() {
             <TextInput
               style={[styles.input, styles.textArea]}
               value={message}
-              onChangeText={setMessage}
+              onChangeText={(value) => {
+                setMessage(value);
+                if (errorMessage) setErrorMessage("");
+              }}
               placeholder="Type your message here..."
-              placeholderTextColor="#b0b0b0"
+              placeholderTextColor={colors.textMuted}
               multiline
               numberOfLines={4}
             />
           </View>
-          <LinearGradient
-            colors={[colors.headerGradient[0], colors.headerGradient[1]]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.button}
-          >
-            <TouchableOpacity style={{ width: "100%" }} onPress={handleSubmit}>
-              <Text style={styles.buttonText}>Send Feedback</Text>
-            </TouchableOpacity>
-          </LinearGradient>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Send Feedback</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
       {showSuccess && (
@@ -135,61 +136,85 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: colors.background,
-    paddingTop: -400, 
   },
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: "flex-start", // Align content to the top
+    justifyContent: "flex-start",
     alignItems: "center",
-    padding: 16,
+    padding: 20,
+    paddingBottom: 110,
   },
   card: {
     width: "100%",
     maxWidth: 420,
-    backgroundColor: colors.card,
-    borderRadius: 24,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: colors.border,
-    ...shadows.medium,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 30,
+    fontWeight: "700",
     color: colors.textPrimary,
-    marginBottom: 24,
-    alignSelf: "center",
-    letterSpacing: 1.2,
+    marginBottom: 4,
+    alignSelf: "flex-start",
+    letterSpacing: 0.2,
+    fontFamily: fonts.display,
   },
-  inputGroup: { marginBottom: 18 },
-  label: { fontSize: 16, fontWeight: "600", marginBottom: 6, color: colors.textPrimary },
+  subtitle: {
+    color: colors.textSecondary,
+    fontSize: 14,
+    marginBottom: 18,
+    fontFamily: fonts.body,
+  },
+  errorText: {
+    width: "100%",
+    color: colors.error,
+    backgroundColor: "rgba(239, 68, 68, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(239, 68, 68, 0.35)",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 12,
+    fontSize: 13,
+    fontFamily: fonts.body,
+  },
+  inputGroup: { marginBottom: 16 },
+  label: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 6,
+    color: colors.textPrimary,
+    fontFamily: fonts.heading,
+  },
   input: {
     backgroundColor: colors.inputBackground,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 13,
     fontSize: 15,
     color: colors.textPrimary,
     borderWidth: 1,
     borderColor: colors.border,
+    fontFamily: fonts.body,
   },
   textArea: {
     minHeight: 80,
     textAlignVertical: "top",
   },
   button: {
-    borderRadius: 12,
-    marginTop: 16,
+    backgroundColor: colors.primary,
+    width: "100%",
+    borderRadius: 14,
+    marginTop: 10,
     marginBottom: 8,
-    overflow: 'hidden',
+    alignItems: "center",
   },
   buttonText: {
     color: colors.buttonText,
-    fontSize: 16,
-    fontWeight: "bold",
-    letterSpacing: 1,
+    fontSize: 15,
+    fontWeight: "700",
+    letterSpacing: 0.4,
     paddingVertical: 14,
     textAlign: "center",
+    fontFamily: fonts.heading,
   },
   modalOverlay: {
     flex: 1,
@@ -198,8 +223,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   successBox: {
-    backgroundColor: colors.card,
-    borderRadius: 18,
+    backgroundColor: colors.surface,
+    borderRadius: 16,
     paddingVertical: 32,
     paddingHorizontal: 32,
     alignItems: 'center',
@@ -217,10 +242,11 @@ const styles = StyleSheet.create({
   },
   successText: {
     color: colors.primaryLight,
-    fontWeight: "bold",
+    fontWeight: "700",
     fontSize: 18,
     textAlign: "center",
     letterSpacing: 0.5,
+    fontFamily: fonts.heading,
   },
 });
 

@@ -1,68 +1,88 @@
+import { Platform } from "react-native";
+
 export const colors = {
   // Base
-  background: '#09090B',
-  surface: '#18181B',
-  surfaceHighlight: '#27272A',
-  card: '#1E1E21', // Added for Card and chart backgrounds
+  background: "#FFFFFF",
+  surface: "#FFFFFF",
+  surfaceHighlight: "#F7F7F7",
+  card: "#FFFFFF",
 
   // Text
-  text: '#FFFFFF',
-  textPrimary: '#FFFFFF', // Added for consistency
-  textSecondary: '#A1A1AA',
-  textMuted: '#71717A',
+  text: "#111111",
+  textPrimary: "#111111",
+  textSecondary: "#525252",
+  textMuted: "#737373",
 
-  // Brand
-  primary: '#6D28D9',
-  primaryLight: '#8B5CF6',
+  // Brand (Accent)
+  primary: "#111111",
+  primaryLight: "#2A2A2A",
 
   // UI Elements
-  border: '#27272A',
-  inputBackground: '#27272A',
-  buttonText: '#FFFFFF',
-
-  // Gradients
-  headerGradient: ['#6D28D9', '#4F46E5'],
-  buttonGradient: ['#6D28D9', '#4F46E5'],
+  border: "#E6E6E6",
+  inputBackground: "#FAFAFA",
+  buttonText: "#FFFFFF",
 
   // Chart
-  chartBackground: '#18181B', // Added for chart backgrounds
-  chartGrid: '#27272A',       // Added for chart grid lines
+  chartBackground: "#FFFFFF",
+  chartGrid: "#E5E7EB",
 
   // Status
-  success: '#22C55E',
-  error: '#EF4444',
+  success: "#16A34A",
+  error: "#EF4444", // red
+  warning: "#F59E0B", // optional (very useful)
 };
 
 export const spacing = {
   xs: 4,
   sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
-  xxl: 48,
+  md: 12,
+  lg: 16,
+  xl: 24,
+  xxl: 32,
 };
 
 export const radii = {
-  sm: 4,
-  md: 8,
-  lg: 12,
-  xl: 16,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
   full: 9999,
 };
 
 export const shadows = {
-  small: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
-    elevation: 2,
+  soft: {
+    shadowColor: "#111111",
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
   },
   medium: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 5,
-    elevation: 5,
+    shadowColor: "#111111",
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 8,
   },
+};
+
+export const fonts = {
+  display:
+    Platform.select({
+      ios: "AvenirNext-Bold",
+      android: "sans-serif-medium",
+      default: "System",
+    }) ?? "System",
+  heading:
+    Platform.select({
+      ios: "AvenirNext-DemiBold",
+      android: "sans-serif-medium",
+      default: "System",
+    }) ?? "System",
+  body:
+    Platform.select({
+      ios: "AvenirNext-Regular",
+      android: "sans-serif",
+      default: "System",
+    }) ?? "System",
 };

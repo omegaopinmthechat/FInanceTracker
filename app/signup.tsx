@@ -3,7 +3,7 @@ import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  Alert,
+  Image,
   StyleSheet,
   Text,
   TextInput,
@@ -11,8 +11,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import { colors, shadows } from "@/theme/colors";
+import { colors, fonts } from "@/theme/colors";
 
 export default function Signup() {
   const [email, setEmail] = useState("");
@@ -20,41 +19,57 @@ export default function Signup() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
 
   const handleSignup = async () => {
+    setErrorMessage("");
+    setSuccessMessage("");
+
     if (!email || !password || !confirmPassword) {
-      alert("Please fill in all fields.");
+      setErrorMessage("Please fill in all fields.");
       return;
     }
     if (password !== confirmPassword) {
-      alert("Input passwords do not match each other");
+      setErrorMessage("Passwords do not match.");
       return;
     }
 
     const { error } = await supabase.auth.signUp({ email, password });
     if (error) {
-      Alert.alert("Oops, Couldn't login. Check after sometime");
+      setErrorMessage(error.message || "Could not sign up right now. Please try again.");
     } else {
-      alert(
-        `Check your email for a confirmation link! \nIf you do not receive any confirmation mail. \nTry logging in`
-      );
-      router.replace("/login");
+      setSuccessMessage("Check your email for a confirmation link, then sign in.");
+      setTimeout(() => {
+        router.replace("/login");
+      }, 1600);
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.card}>
+        <Image
+          source={require("../images/logo.png")}
+          style={styles.logo}
+          resizeMode="contain"
+        />
         <Text style={styles.title}>Create Account</Text>
+        <Text style={styles.subtitle}>Start tracking your money in one place.</Text>
+        {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+        {successMessage ? <Text style={styles.successText}>{successMessage}</Text> : null}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Email</Text>
           <TextInput
             style={styles.input}
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(value) => {
+              setEmail(value);
+              if (errorMessage) setErrorMessage("");
+            }}
             placeholder="user@email.com"
-            placeholderTextColor="#b0b0b0"
+            placeholderTextColor={colors.textMuted}
             keyboardType="email-address"
             autoCapitalize="none"
           />
@@ -65,9 +80,12 @@ export default function Signup() {
             <TextInput
               style={[styles.input, { flex: 1, paddingRight: 40 }]}
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(value) => {
+                setPassword(value);
+                if (errorMessage) setErrorMessage("");
+              }}
               placeholder="Password"
-              placeholderTextColor="#b0b0b0"
+              placeholderTextColor={colors.textMuted}
               secureTextEntry={!showPassword}
             />
             <TouchableOpacity
@@ -78,7 +96,7 @@ export default function Signup() {
               <Feather
                 name={showPassword ? "eye" : "eye-off"}
                 size={22}
-                color="#a770ef"
+                color={colors.primary}
               />
             </TouchableOpacity>
           </View>
@@ -89,9 +107,12 @@ export default function Signup() {
             <TextInput
               style={[styles.input, { flex: 1, paddingRight: 40 }]}
               value={confirmPassword}
-              onChangeText={setConfirmPassword}
+              onChangeText={(value) => {
+                setConfirmPassword(value);
+                if (errorMessage) setErrorMessage("");
+              }}
               placeholder="Password"
-              placeholderTextColor="#b0b0b0"
+              placeholderTextColor={colors.textMuted}
               secureTextEntry={!showConfirmPassword}
             />
             <TouchableOpacity
@@ -102,21 +123,14 @@ export default function Signup() {
               <Feather
                 name={showConfirmPassword ? "eye" : "eye-off"}
                 size={22}
-                color="#a770ef"
+                color={colors.primary}
               />
             </TouchableOpacity>
           </View>
         </View>
-        <LinearGradient
-          colors={["#a770ef", "#f6d365"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.button}
-        >
-          <TouchableOpacity style={{ width: "100%" }} onPress={handleSignup}>
-            <Text style={styles.buttonText}>Sign Up</Text>
-          </TouchableOpacity>
-        </LinearGradient>
+        <TouchableOpacity style={styles.button} onPress={handleSignup}>
+          <Text style={styles.buttonText}>Sign Up</Text>
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => router.replace("/login")}>
           <Text style={styles.link}>Already have an account? Sign In</Text>
         </TouchableOpacity>
@@ -130,57 +144,102 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
     justifyContent: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
   },
   card: {
-    backgroundColor: colors.card,
-    borderRadius: 24,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: colors.border,
-    ...shadows.medium,
+    width: "100%",
+    maxWidth: 420,
+    alignSelf: "center",
+  },
+  logo: {
+    width: 74,
+    height: 74,
+    marginBottom: 14,
   },
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
+    fontSize: 32,
+    fontWeight: "700",
     color: colors.textPrimary,
-    marginBottom: 32,
-    alignSelf: "center",
-    letterSpacing: 1.2,
+    marginBottom: 4,
+    alignSelf: "flex-start",
+    letterSpacing: 0.2,
+    fontFamily: fonts.display,
   },
-  inputGroup: { marginBottom: 20 },
-  label: { fontSize: 16, fontWeight: "600", marginBottom: 6, color: colors.textPrimary },
+  subtitle: {
+    color: colors.textSecondary,
+    fontSize: 14,
+    marginBottom: 20,
+    fontFamily: fonts.body,
+  },
+  errorText: {
+    width: "100%",
+    color: colors.error,
+    backgroundColor: "rgba(239, 68, 68, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(239, 68, 68, 0.35)",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 12,
+    fontSize: 13,
+    fontFamily: fonts.body,
+  },
+  successText: {
+    width: "100%",
+    color: colors.success,
+    backgroundColor: "rgba(22, 163, 74, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(22, 163, 74, 0.35)",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 12,
+    fontSize: 13,
+    fontFamily: fonts.body,
+  },
+  inputGroup: { marginBottom: 16 },
+  label: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 6,
+    color: colors.textPrimary,
+    fontFamily: fonts.heading,
+  },
   input: {
     backgroundColor: colors.inputBackground,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 13,
     fontSize: 16,
     color: colors.textPrimary,
     borderWidth: 1,
     borderColor: colors.border,
+    fontFamily: fonts.body,
   },
   button: {
-    borderRadius: 12,
-    marginTop: 16,
+    backgroundColor: colors.primary,
+    width: "100%",
+    borderRadius: 14,
+    marginTop: 10,
     marginBottom: 8,
-    overflow: 'hidden',
+    alignItems: "center",
   },
   buttonText: {
     color: colors.buttonText,
-    fontSize: 16,
-    fontWeight: "bold",
-    letterSpacing: 1,
+    fontSize: 15,
+    fontWeight: "700",
+    letterSpacing: 0.4,
     paddingVertical: 14,
     textAlign: "center",
+    fontFamily: fonts.heading,
   },
   link: {
-    color: colors.primaryLight,
+    color: colors.textSecondary,
     marginTop: 10,
-    fontSize: 15,
-    textAlign: "center",
-    textDecorationLine: "underline",
+    fontSize: 13,
+    textAlign: "left",
     fontWeight: "500",
+    fontFamily: fonts.body,
   },
   eyeIcon: {
     position: "absolute",

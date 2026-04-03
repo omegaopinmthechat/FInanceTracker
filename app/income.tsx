@@ -2,7 +2,6 @@ import { supabase } from "@/utils/supabase";
 import { Feather } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import React, { useEffect, useState } from "react";
-import { Modal } from "react-native";
 import {
   FlatList,
   StyleSheet,
@@ -12,11 +11,11 @@ import {
   View,
   ScrollView,
   Dimensions,
+  Modal,
 } from "react-native";
-import { ActivityIndicator } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import { colors, shadows } from '@/theme/colors';
+import { colors, fonts } from '@/theme/colors';
+import { FormTableSkeleton } from "@/components/LoadingSkeleton";
 
 const months = [
   "January",
@@ -51,18 +50,21 @@ export default function Income() {
   const [incomeData, setIncomeData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [reason, setReason] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   // keep date as a string so input can be cleared
   const [date, setDate] = useState<string>(currentDate.toString());
 
   const handleSubmit = async () => {
+    setErrorMessage("");
+
     if (!year || !month || !income || !reason || date === "") {
-      alert("Please fill in all fields.");
+      setErrorMessage("Please fill in all fields.");
       return;
     }
 
     const parsedDate = parseInt(date, 10);
     if (isNaN(parsedDate) || parsedDate < 1 || parsedDate > 31) {
-      alert("Please enter a valid date between 1 and 31.");
+      setErrorMessage("Please enter a valid date between 1 and 31.");
       return;
     }
 
@@ -105,8 +107,9 @@ export default function Income() {
       setDate(currentDate.toString());
       setIncome("");
       setReason("");
+      setErrorMessage("");
     } catch (err) {
-      alert("Failed to add income. See console for details.");
+      setErrorMessage("Failed to add income. See console for details.");
       console.log("Supabase insert error", err);
     }
   };
@@ -123,6 +126,7 @@ export default function Income() {
 
     if (error) {
       console.error("Error fetching income:", error);
+      setErrorMessage("Failed to fetch income data.");
     } else {
       setIncomeData(data || []);
     }
@@ -139,20 +143,23 @@ export default function Income() {
       await supabase.from("Income").delete().eq("id", id);
       fetchIncome();
     } catch (err) {
-      alert("Failed to delete income.");
+      setErrorMessage("Failed to delete income.");
       console.log("Supabase delete error", err);
     }
   };
 
   if (loading) {
     return (
-      <SafeAreaView
-        style={[
-          styles.container,
-          { justifyContent: "center", alignItems: "center" },
-        ]}
-      >
-        <ActivityIndicator size="large" color="#9b59b6" />
+      <SafeAreaView style={styles.container}>
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
+            { maxWidth: contentMaxWidth, width: "100%", alignSelf: "center" },
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          <FormTableSkeleton />
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -166,13 +173,19 @@ export default function Income() {
         ]}
         keyboardShouldPersistTaps="handled"
       >
+        <Text style={styles.pageTitle}>Income Tracker</Text>
+        <Text style={styles.pageSubtitle}>Capture earnings with clean monthly records.</Text>
+        {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
         <View style={styles.card}>
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Year</Text>
             <View style={styles.pickerWrapper}>
               <Picker
                 selectedValue={year}
-                onValueChange={(itemValue) => setYear(itemValue)}
+                onValueChange={(itemValue) => {
+                  setYear(itemValue);
+                  if (errorMessage) setErrorMessage("");
+                }}
                 style={styles.picker}
                 itemStyle={styles.pickerItem}
               >
@@ -188,7 +201,10 @@ export default function Income() {
             <View style={styles.pickerWrapper}>
               <Picker
                 selectedValue={month}
-                onValueChange={(itemValue) => setMonth(itemValue)}
+                onValueChange={(itemValue) => {
+                  setMonth(itemValue);
+                  if (errorMessage) setErrorMessage("");
+                }}
                 style={styles.picker}
                 itemStyle={styles.pickerItem}
               >
@@ -202,9 +218,12 @@ export default function Income() {
               <TextInput
                 style={styles.input}
                 value={date}
-                onChangeText={(text) => setDate(text)}
+                onChangeText={(text) => {
+                  setDate(text);
+                  if (errorMessage) setErrorMessage("");
+                }}
                 placeholder="Ex: 21"
-                placeholderTextColor="#b0b0b0"
+                placeholderTextColor={colors.textMuted}
                 keyboardType="numeric"
               />
           </View>
@@ -213,30 +232,29 @@ export default function Income() {
             <TextInput
               style={styles.input}
               value={income}
-              onChangeText={setIncome}
+              onChangeText={(value) => {
+                setIncome(value);
+                if (errorMessage) setErrorMessage("");
+              }}
               placeholder="Ex: 2500"
-              placeholderTextColor="#b0b0b0"
+              placeholderTextColor={colors.textMuted}
               keyboardType="numeric"
             />
             <Text style={styles.label2}>Reason</Text>
             <TextInput
               style={styles.input}
               value={reason}
-              onChangeText={setReason}
+              onChangeText={(value) => {
+                setReason(value);
+                if (errorMessage) setErrorMessage("");
+              }}
               placeholder="Salary"
-              placeholderTextColor="#b0b0b0"
+              placeholderTextColor={colors.textMuted}
             />
           </View>
-          <LinearGradient
-            colors={[colors.headerGradient[0], colors.headerGradient[1]]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.button}
-          >
-            <TouchableOpacity style={{ width: "100%" }} onPress={handleSubmit}>
-              <Text style={styles.buttonText}>Add Income</Text>
-            </TouchableOpacity>
-          </LinearGradient>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Add Income</Text>
+          </TouchableOpacity>
         </View>
         <Text style={styles.sectionTitle}>Past Income</Text>
         <View style={styles.tableCard}>
@@ -335,7 +353,7 @@ export default function Income() {
                     </View>
                     <View style={{ width: 40, alignItems: "center" }}>
                       <TouchableOpacity onPress={() => handleDelete(item.id)}>
-                        <Feather name="trash-2" size={20} color="#e74c3c" />
+                        <Feather name="trash-2" size={20} color={colors.error} />
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -386,37 +404,68 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   card: {
-    backgroundColor: colors.card,
-    borderRadius: 24,
-    padding: 24,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: colors.border,
-    ...shadows.medium,
+    marginBottom: 18,
     width: "100%",
   },
+  pageTitle: {
+    fontSize: 30,
+    fontWeight: "700",
+    color: colors.textPrimary,
+    marginBottom: 4,
+    alignSelf: "flex-start",
+    letterSpacing: 0.2,
+    fontFamily: fonts.display,
+  },
+  pageSubtitle: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginBottom: 18,
+    alignSelf: "flex-start",
+    fontFamily: fonts.body,
+  },
+  errorText: {
+    width: "100%",
+    color: colors.error,
+    backgroundColor: "rgba(239, 68, 68, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(239, 68, 68, 0.35)",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 12,
+    fontSize: 13,
+    fontFamily: fonts.body,
+  },
   label2: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "600",
     marginBottom: 6,
-    marginTop: 5,
+    marginTop: 8,
     color: colors.textPrimary,
+    fontFamily: fonts.heading,
   },
-  inputGroup: { marginBottom: 18, width: "100%" },
-  label: { fontSize: 16, fontWeight: "600", marginBottom: 6, color: colors.textPrimary },
+  inputGroup: { marginBottom: 16, width: "100%" },
+  label: {
+    fontSize: 15,
+    fontWeight: "600",
+    marginBottom: 6,
+    color: colors.textPrimary,
+    fontFamily: fonts.heading,
+  },
   input: {
     backgroundColor: colors.inputBackground,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
+    paddingVertical: 13,
+    fontSize: 15,
     color: colors.textPrimary,
     borderWidth: 1,
     borderColor: colors.border,
+    fontFamily: fonts.body,
   },
   pickerWrapper: {
     backgroundColor: colors.inputBackground,
-    borderRadius: 12,
+    borderRadius: 14,
     width: "100%",
     overflow: "hidden",
     borderWidth: 1,
@@ -432,109 +481,118 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   button: {
-    borderRadius: 12,
-    marginTop: 16,
-    marginBottom: 8,
-    overflow: 'hidden',
+    backgroundColor: colors.primary,
+    width: "100%",
+    borderRadius: 14,
+    marginTop: 10,
+    marginBottom: 10,
+    alignItems: "center",
   },
   buttonText: {
     color: colors.buttonText,
-    fontSize: 16,
-    fontWeight: "bold",
-    letterSpacing: 1,
+    fontSize: 15,
+    fontWeight: "700",
+    letterSpacing: 0.4,
     paddingVertical: 14,
     textAlign: "center",
+    fontFamily: fonts.heading,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 20,
+    fontWeight: "700",
     marginTop: 12,
-    marginBottom: 8,
+    marginBottom: 10,
     alignSelf: "flex-start",
     color: colors.textPrimary,
+    letterSpacing: 0.2,
+    fontFamily: fonts.heading,
   },
   tableCard: {
-    backgroundColor: colors.card,
-    borderRadius: 18,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: colors.border,
-    ...shadows.medium,
     marginBottom: 24,
     width: "100%",
   },
   tableHeader: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.surfaceHighlight, // changed from "#f3e5f5"
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    paddingVertical: 6,
+    backgroundColor: "transparent",
+    borderBottomWidth: 1,
+    borderColor: colors.border,
+    paddingVertical: 8,
     width: '100%',
   },
   headerCell: {
-    fontWeight: "bold",
-    fontSize: 16,
+    fontWeight: "600",
+    fontSize: 12,
     textAlign: "left",
     paddingLeft: 10,
-    color: colors.textPrimary, // ensure header text is visible
+    color: colors.textSecondary,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+    fontFamily: fonts.heading,
   },
   tableRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.card, // changed from "#fff"
-    paddingVertical: 8,
+    backgroundColor: "transparent",
+    paddingVertical: 10,
     borderBottomWidth: 1,
-    borderColor: colors.surfaceHighlight, // changed from "#eee"
+    borderColor: colors.border,
     minHeight: 36,
     width: '100%',
   },
   cell: {
-    fontSize: 16,
+    fontSize: 15,
     textAlign: "left",
-    color: colors.textPrimary, // changed from "#333"
+    color: colors.textPrimary,
     paddingLeft: 10,
+    fontFamily: fonts.body,
   },
   cellIncome: {
-    fontSize: 16,
+    fontSize: 15,
     textAlign: "left",
-    color: "#8ec322",
-    fontWeight: "bold",
+    color: colors.success,
+    fontWeight: "700",
     paddingLeft: 10,
+    fontFamily: fonts.heading,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(11, 15, 20, 0.74)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
   modalContent: {
-    backgroundColor: 'white',
-    borderRadius: 10,
+    backgroundColor: colors.surface,
+    borderRadius: 16,
     padding: 20,
     width: '100%',
     maxWidth: 400,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#333',
+    color: colors.textPrimary,
+    fontFamily: fonts.heading,
   },
   modalText: {
     fontSize: 16,
-    color: '#333',
+    color: colors.textSecondary,
     marginBottom: 20,
+    fontFamily: fonts.body,
   },
   closeButton: {
-    backgroundColor: '#9b59b6',
-    padding: 10,
-    borderRadius: 5,
+    backgroundColor: colors.primary,
+    paddingVertical: 10,
+    borderRadius: 999,
     alignItems: 'center',
   },
   closeButtonText: {
-    color: 'white',
+    color: colors.buttonText,
     fontWeight: 'bold',
+    fontFamily: fonts.heading,
   },
 });

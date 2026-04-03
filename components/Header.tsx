@@ -1,9 +1,8 @@
-import { Text, StyleSheet, TouchableOpacity } from "react-native";
+import { Image, Text, StyleSheet, TouchableOpacity, View } from "react-native";
 import { supabase } from "@/utils/supabase";
 import { useRouter, usePathname } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import { colors, shadows, spacing, radii } from "@/theme/colors";
+import { colors, fonts } from "@/theme/colors";
 
 export default function Header() {
   const router = useRouter();
@@ -17,14 +16,16 @@ export default function Header() {
   };
 
   return (
-    <LinearGradient
-      colors={colors.headerGradient as [string, string]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 0 }}
-      style={styles.gradient}
-    >
+    <View style={styles.headerContainer}>
       <SafeAreaView style={styles.header}>
-        <Text style={styles.title}>FinanceTracker</Text>
+        <View style={styles.brandWrap}>
+          <Image
+            source={require("../images/logo.png")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <Text style={styles.title}>FinanceTracker</Text>
+        </View>
         {!hideLogout && (
           <TouchableOpacity
             style={styles.logoutBtn}
@@ -35,38 +36,60 @@ export default function Header() {
           </TouchableOpacity>
         )}
       </SafeAreaView>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  gradient: {
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+  headerContainer: {
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderColor: colors.border,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 }, // shadow below header
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 8,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+  },
+  brandWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexShrink: 1,
+  },
+  logo: {
+    width: 30,
+    height: 30,
+    marginRight: 10,
+    borderRadius: 8,
   },
   title: {
     color: colors.textPrimary,
-    fontSize: 24,
-    fontWeight: "bold",
-    letterSpacing: 0.5,
+    fontSize: 23,
+    fontWeight: "700",
+    letterSpacing: 0.3,
+    fontFamily: fonts.display,
+    flexShrink: 1,
   },
   logoutBtn: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    backgroundColor: "rgba(255,255,255,0.15)",
-    borderRadius: 20,
+    paddingVertical: 7,
+    paddingHorizontal: 14,
+    backgroundColor: colors.primary,
+    borderRadius: 999,
   },
   logoutText: {
-    color: colors.textPrimary,
+    color: colors.buttonText,
     fontWeight: "600",
     fontSize: 14,
+    fontFamily: fonts.heading,
   },
 });
 

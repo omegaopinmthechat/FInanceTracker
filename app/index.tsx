@@ -1,31 +1,51 @@
 import { useEffect } from "react";
 import { useRouter } from "expo-router";
-import { View, ActivityIndicator, StyleSheet } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { View, StyleSheet, Image } from "react-native";
+import { colors } from "@/theme/colors";
+import { supabase } from "@/utils/supabase";
 
 export default function Index() {
   const router = useRouter();
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      router.replace("/login");
-    }, 50); // short delay ensures layout is mounted
-    return () => clearTimeout(timeout);
-  }, []);
+    let isActive = true;
+
+    const restoreSessionAndRoute = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!isActive) return;
+      router.replace(session ? "/home" : "/login");
+    };
+
+    restoreSessionAndRoute();
+
+    return () => {
+      isActive = false;
+    };
+  }, [router]);
 
   return (
-    <LinearGradient
-      colors={["#a770ef", "#f6d365"]}
-      style={styles.gradient}
-    >
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#fff" />
-      </View>
-    </LinearGradient>
+    <View style={styles.container}>
+      <Image
+        source={require("../images/logo.png")}
+        style={styles.logo}
+        resizeMode="contain"
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  gradient: { flex: 1, justifyContent: "center", alignItems: "center" },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.background,
+  },
+  logo: {
+    width: 140,
+    height: 140,
+  },
 });
